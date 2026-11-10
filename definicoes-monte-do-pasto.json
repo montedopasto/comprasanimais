@@ -1,0 +1,27 @@
+{
+  "app": "compras-gado",
+  "versao": 1,
+  "cfg": {
+    "faturacao": "clara.guedes@montedopasto.pt",
+    "equipa": "jorge.saopedro@montedopasto.pt; sergio.rosa@montedopasto.pt; ines.fidalgo@montedopasto.pt; joana.fidalgo@montedopasto.pt; jose.almanso@montedopasto.pt; xavier.cortegano@montedopasto.pt; bruno.pereira@montedopasto.pt; pedro.horta@montedopasto.pt; jorge.dias@montedopasto.pt; alexandra.silva@montedopasto.pt; madalena.bacelos@montedopasto.pt; ricardo.silva@montedopasto.pt; nuno.nunes@montedopasto.pt; joao.martins@montedopasto.pt; silvia.marques@montedopasto.pt",
+    "empresa": "Monte do Pasto, Lda",
+    "nif": "505 609 762",
+    "morada": "Herdade do Monte Ruivo, Estrada Municipal 524, 7920-201 Alvito",
+    "categoria": "G1",
+    "refM": 220,
+    "refF": 210,
+    "desconto": 3,
+    "acima": 50,
+    "iva": 6,
+    "condicoes": [
+      "Pesagem é feita na balança mais próxima com os machos a serem pesados à parte das fêmeas e será através dos valores dessa pesagem que as contas são feitas;",
+      "Pagamento é feito à segunda-feira caso os documentos se encontrem nos conformes e se a fatura chegar até sexta-feira;",
+      "As fêmeas não podem ter uma idade superior aos 11 meses;",
+      "A classificação sanitária da exploração tem obrigatoriamente de ser: OFICIALMENTE INDEMNE B4 T3 L4, pelo menos nos últimos 3 anos;",
+      "Testes de pré-movimentação assegurados (teste de tuberculina até 12 meses e teste de tuberculina e colheita de sangue no caso de 12 meses ou mais);",
+      "Taxas Sirca a descontar na fatura;",
+      "Animais terão de trazer passaportes com o respetivo averbamento sanitário dentro da validade."
+    ]
+  },
+  "negocios": []
+}
