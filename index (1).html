@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compras de gado | Monte do Pasto</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%90%84%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --bg:#F3F5EE; --surface:#FFFFFF; --field:#FFFFFF; --ink:#1E2419; --muted:#5F665A; --line:#D6DACC;
+  --brand:#33452A; --brand-ink:#FFFFFF; --brand-text:#33452A; --nav-active:rgba(255,255,255,.16);
+  --soft:#E6EDDA; --accent-text:#8A5E10; --danger:#A3342B;
+  --paper:#FFFFFF; --paper-ink:#000000;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --bg:#141811; --surface:#1C2118; --field:#232920; --ink:#E7EBE1; --muted:#A1A996; --line:#353D2E;
+    --brand:#2A3823; --brand-ink:#EEF3E6; --brand-text:#B5CB98; --nav-active:rgba(255,255,255,.12);
+    --soft:#25301F; --accent-text:#E0B25C; --danger:#E5887E;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#141811; --surface:#1C2118; --field:#232920; --ink:#E7EBE1; --muted:#A1A996; --line:#353D2E;
+  --brand:#2A3823; --brand-ink:#EEF3E6; --brand-text:#B5CB98; --nav-active:rgba(255,255,255,.12);
+  --soft:#25301F; --accent-text:#E0B25C; --danger:#E5887E;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--brand)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--brand);color:var(--brand-ink)}
+.top .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:12px 20px;padding:12px 20px;flex-wrap:wrap}
+.brand{font-stretch:118%;font-weight:760;font-size:19px;letter-spacing:-.01em;line-height:1.2}
+.brand span{display:block;font-weight:400;font-stretch:100%;font-size:13px;opacity:.78;letter-spacing:0}
+nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;color:inherit;border:0;padding:8px 12px;border-radius:6px;font:inherit;font-size:15px;cursor:pointer;opacity:.82}
+nav button:hover{opacity:1}
+nav button[aria-current="page"]{background:var(--nav-active);opacity:1;font-weight:600}
+main{max-width:1040px;margin:0 auto;padding:28px 20px 72px}
+h1{font-stretch:114%;font-weight:760;font-size:clamp(26px,4.2vw,36px);line-height:1.12;margin:0 0 8px;letter-spacing:-.018em}
+h2{font-size:18px;font-weight:700;margin:0 0 4px;font-stretch:108%}
+h3{font-size:15px;font-weight:650;margin:22px 0 10px;color:var(--brand-text)}
+h3:first-child{margin-top:0}
+p{margin:0 0 10px}
+.lead{color:var(--muted);margin:0;max-width:62ch}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.head{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;margin-bottom:24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px 16px}
+.f{display:flex;flex-direction:column;gap:5px;font-size:14px;color:var(--muted);min-width:0}
+.f.wide{grid-column:1/-1}
+.f.w2{grid-column:span 2}
+@media (max-width:520px){.f.w2{grid-column:1/-1}}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:7px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.45}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--brand-text);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--brand);color:var(--brand-ink);border:1px solid var(--brand);border-radius:7px;padding:10px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn:hover{filter:brightness(1.12)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--soft);filter:none}
+.btn.danger{color:var(--danger)}
+.btn[disabled]{opacity:.55;cursor:default;filter:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:28px}
+.list h2{padding:14px 18px 12px;border-bottom:1px solid var(--line);font-size:15px;color:var(--muted);font-weight:600;margin:0}
+.deal{display:grid;grid-template-columns:1fr auto;gap:2px 16px;align-items:baseline;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:14px 18px;font:inherit;color:inherit;cursor:pointer}
+.deal:last-child{border-bottom:0}
+.deal:hover{background:var(--soft)}
+.dn{font-weight:650;font-size:17px}
+.dm{color:var(--muted);font-size:14px}
+.dv{font-weight:650;justify-self:end}
+.badge{font-size:13px;padding:2px 10px;border-radius:999px;background:var(--soft);color:var(--brand-text);font-weight:600;justify-self:end}
+.badge.done{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500}
+.empty{padding:28px}
+.assist{border:1px dashed var(--brand-text);background:var(--soft);border-radius:10px;padding:16px 18px;margin-bottom:20px}
+.assist[hidden]{display:none}
+.assist h2{font-size:16px}
+.assist .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.assist .status{font-size:14px;color:var(--muted)}
+.filepick{font-size:14px;color:var(--muted);display:inline-flex;align-items:center;gap:8px}
+.filepick input{width:auto;padding:6px;font-size:14px}
+.step{display:grid;grid-template-columns:40px 1fr;gap:14px;margin-bottom:26px}
+.stepn{width:34px;height:34px;border-radius:50%;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-weight:700;font-size:16px;margin-top:16px}
+.step details{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.step summary{list-style:none;cursor:pointer;padding:16px 20px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.step summary::-webkit-details-marker{display:none}
+.step summary::after{content:"Mostrar";font-size:14px;color:var(--muted)}
+.step details[open] summary::after{content:"Esconder"}
+.stepbody{padding:0 20px 20px}
+.stepbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 20px 20px}
+@media (max-width:560px){.step{grid-template-columns:1fr}.stepn{margin:0}}
+.mailhdr{margin:0 0 12px;display:grid;gap:6px}
+.mailhdr div{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:start;font-size:14px}
+.mailhdr dt{color:var(--muted)}
+.mailhdr dd{margin:0;word-break:break-word}
+.linkbtn{background:none;border:0;color:var(--brand-text);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:0 2px}
+.linkbtn:hover{text-decoration:underline}
+.mail{background:var(--paper);color:var(--paper-ink);border:1px solid var(--line);border-radius:8px;padding:18px 20px;overflow-x:auto;font-family:Calibri,Carlito,Arial,sans-serif;font-size:15px;line-height:1.4}
+.mail p{margin:0 0 10px}
+.mail ul{margin:0 0 10px;padding-left:22px}
+.totalline{display:flex;gap:6px 24px;flex-wrap:wrap;align-items:baseline;margin:20px 0 14px;padding-top:18px;border-top:1px solid var(--line)}
+.totalbig{font-size:clamp(30px,5.5vw,44px);font-weight:760;font-stretch:112%;letter-spacing:-.02em;color:var(--accent-text);line-height:1}
+.totalsub{color:var(--muted);font-size:15px}
+.warn{color:var(--danger);font-size:14px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 40px);z-index:20}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.meta{color:var(--muted);font-size:15px;margin:0}
+.loterow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;margin-bottom:12px}
+.loterow .rm{padding-bottom:11px}
+@media (max-width:520px){.loterow{grid-template-columns:1fr 1fr}}
+.lotegrid{display:grid;grid-template-columns:minmax(110px,1.1fr) 1fr 1fr 1fr;gap:10px 12px;align-items:center}
+.lg-h{font-size:13px;color:var(--muted)}
+.lg-n{font-weight:600}
+@media (max-width:560px){.lotegrid{grid-template-columns:1fr 1fr 1fr}.lg-first{display:none}.lg-n{grid-column:1/-1;margin-top:8px}}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="brand">Compras de gado<span>Monte do Pasto</span></div>
+  <nav aria-label="Secções">
+    <button data-go="lista">Negócios</button>
+    <button data-go="novo">Novo negócio</button>
+    <button data-go="definicoes">Definições</button>
+  </nav>
+</div></header>
+<main id="main"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+const DEFAULT_CFG = {
+  faturacao: "", equipa: "",
+  empresa: "Monte do Pasto, Lda", nif: "505 609 762",
+  morada: "Herdade do Monte Ruivo, Estrada Municipal 524, 7920-201 Alvito",
+  categoria: "G1", refM: 220, refF: 210, desconto: 3, acima: 50, iva: 6,
+  condicoes: [
+    "Pesagem é feita na balança mais próxima com os machos a serem pesados à parte das fêmeas e será através dos valores dessa pesagem que as contas são feitas;",
+    "Pagamento é feito à segunda-feira caso os documentos se encontrem nos conformes e se a fatura chegar até sexta-feira;",
+    "As fêmeas não podem ter uma idade superior aos 11 meses;",
+    "A classificação sanitária da exploração tem obrigatoriamente de ser: OFICIALMENTE INDEMNE B4 T3 L4, pelo menos nos últimos 3 anos;",
+    "Testes de pré-movimentação assegurados (teste de tuberculina até 12 meses e teste de tuberculina e colheita de sangue no caso de 12 meses ou mais);",
+    "Taxas Sirca a descontar na fatura;",
+    "Animais terão de trazer passaportes com o respetivo averbamento sanitário dentro da validade."
+  ]
+};
+const S = { view: "lista", deals: [], cfg: { ...DEFAULT_CFG }, currentId: null, loading: true, draft: null };
+let db = null, user = null, uid = null;
+const MAILS = {};
+const $ = s => document.querySelector(s);
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function r2(x){ return Math.round((x + Number.EPSILON) * 100) / 100; }
+function num(v){
+  if (v == null || v === "") return null;
+  let s = String(v).trim().replace(/[\s\u00a0€]/g, "").replace(/kg$/i, "");
+  if (s.includes(",") && s.includes(".")) s = s.replace(/\./g, "");
+  s = s.replace(",", ".");
+  const n = Number(s); return s !== "" && isFinite(n) ? n : null;
+}
+function fmt2(n, group){
+  const neg = n < 0; const [i, d] = Math.abs(n).toFixed(2).split(".");
+  return (neg ? "-" : "") + (group ? i.replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0") : i) + "," + d;
+}
+const eur = n => fmt2(n, true) + "\u00a0€";
+const kg = n => fmt2(n, false);
+const pctTxt = n => String(n).replace(".", ",") + "%";
+const priceKg = n => fmt2(n, false) + "€/kg";
+function isoLocal(dt){ return dt.getFullYear() + "-" + String(dt.getMonth()+1).padStart(2,"0") + "-" + String(dt.getDate()).padStart(2,"0"); }
+function addDays(n){ const d = new Date(); d.setDate(d.getDate()+n); return isoLocal(d); }
+function dateLong(iso){ return new Date(iso + "T12:00:00").toLocaleDateString("pt-PT", { day:"numeric", month:"long", year:"numeric" }); }
+function dateShort(iso){ return new Date(iso + "T12:00:00").toLocaleDateString("pt-PT", { day:"numeric", month:"short" }); }
+function splitEmails(s){ return String(s || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); }
+function lines(s){ return String(s || "").split("\n").map(x => x.trim()).filter(Boolean); }
+function nomeV(d){ return ((d.tratamento ? d.tratamento + " " : "") + (d.vendedor || "")).trim(); }
+function aoV(d){ return (/^(Sra\.|Dra\.|D\.|Prof\.ª|Eng\.ª)$/.test(d.tratamento || "") ? "à " : d.tratamento ? "ao " : "a ") + nomeV(d); }
+function saudacao(){ return new Date().getHours() < 13 ? "Bom dia" : "Boa tarde"; }
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2600); }
+const cur = () => S.deals.find(d => d.id === S.currentId);
+
+/* ---------- cálculo ---------- */
+function calcSex(peso, n, preco, ref, desc, acima, iva){
+  if (!(peso > 0 && n > 0 && preco > 0)) return null;
+  const refN = ref > 0 ? ref : Infinity;
+  const d = r2(peso * desc / 100);
+  const liq = r2(peso - d);
+  const medio = r2(liq / n);
+  const ate = r2(Math.min(medio, refN) * preco);
+  const ac = r2(Math.max(0, medio - refN) * preco * acima / 100);
+  const pa = r2(ate + ac);
+  const valor = r2(pa * n);
+  const iv = r2(valor * iva / 100);
+  return { peso, n, preco, ref, d, liq, medio, ate, ac, pa, valor, iv, total: r2(valor + iv) };
+}
+const SEXO = { M: "Machos", F: "Fêmeas" };
+function newId(){ return "l" + Math.random().toString(36).slice(2, 8); }
+function lotesOf(d){
+  let L;
+  if (Array.isArray(d.lotes) && d.lotes.length) L = d.lotes;
+  else {
+    L = [];
+    if (d.precoM) L.push({ id:"m1", sexo:"M", categoria:d.categoria || "", preco:d.precoM });
+    if (d.precoF) L.push({ id:"f1", sexo:"F", categoria:d.categoria || "", preco:d.precoF });
+  }
+  return [...L.filter(l => l.sexo === "M"), ...L.filter(l => l.sexo !== "M")];
+}
+function loteNome(l){ return SEXO[l.sexo] + (l.categoria ? " " + l.categoria : ""); }
+function fechoOf(d, f){
+  f = f || d.fecho || {};
+  if (f.l) return f;
+  const l = {};
+  if (f.pesoM != null || f.nM != null) l.m1 = { peso:f.pesoM, n:f.nM, preco:f.precoM };
+  if (f.pesoF != null || f.nF != null) l.f1 = { peso:f.pesoF, n:f.nF, preco:f.precoF };
+  return { l, iva: f.iva };
+}
+function calcDeal(d, f){
+  const F = fechoOf(d, f);
+  const desc = d.desconto ?? 0, acima = d.acima ?? 100, iva = F.iva ?? S.cfg.iva ?? 6;
+  const cols = lotesOf(d).map(lo => {
+    const x = (F.l || {})[lo.id] || {};
+    const r = calcSex(x.peso, x.n, x.preco ?? lo.preco, lo.sexo === "M" ? d.refM : d.refF, desc, acima, iva);
+    return r ? { ...r, lote: lo } : null;
+  }).filter(Boolean);
+  const sum = k => r2(cols.reduce((a, x) => a + x[k], 0));
+  return { cols, tot: { n: cols.reduce((a, x) => a + x.n, 0), valor: sum("valor"), iv: sum("iv"), total: sum("total") }, desc, iva, ok: cols.length > 0 };
+}
+
+/* ---------- emails ---------- */
+function recipients(d, kind){
+  const fat = splitEmails(S.cfg.faturacao), eq = splitEmails(S.cfg.equipa), v = splitEmails(d.emailVendedor);
+  return kind === "acordo" ? { to: [...fat, ...v], cc: eq } : { to: eq, cc: [...fat, ...v] };
+}
+function emailAcordo(d){
+  const L = lotesOf(d).filter(l => l.preco);
+  const prices = L.map(l => ({ label: loteNome(l), val: priceKg(l.preco) }));
+  const rules = [];
+  if (d.desconto > 0){ rules.push(`Desconto de ${pctTxt(d.desconto)} para a barriga;`); rules.push("O preço por kg aplica-se após o desconto da barriga;"); }
+  const temM = L.some(l => l.sexo === "M") && d.refM, temF = L.some(l => l.sexo === "F") && d.refF;
+  if ((d.acima ?? 100) < 100 && (temM || temF)){
+    const quanto = d.acima == 50 ? "a metade" : `a ${pctTxt(d.acima)} do preço`;
+    const refs = temM && temF ? `dos ${d.refM} kg para os machos e ${d.refF} kg para as fêmeas` : temM ? `dos ${d.refM} kg para os machos` : `dos ${d.refF} kg para as fêmeas`;
+    rules.push(`Pagar ${quanto} os kg acima ${refs};`);
+  }
+  (d.condicoes || []).forEach(c => rules.push(c));
+  (d.observacoes || []).forEach(c => rules.push(c));
+  const intro = `Chegámos a acordo para a compra de ${d.nAnimais ? "aproximadamente " + d.nAnimais + " animais" : "animais"} ${aoV(d)} com as seguintes condições:`;
+  let carr = "";
+  if (d.dataCarregamento){
+    const dia = new Date(d.dataCarregamento + "T12:00:00").toLocaleDateString("pt-PT", { weekday:"long" });
+    const base = `${dia}, dia ${dateLong(d.dataCarregamento)}`;
+    const quando = d.dataCarregamento === addDays(1) ? `amanhã, ${base}` : d.dataCarregamento === addDays(0) ? `hoje, ${base}` : `${/sábado|domingo/.test(dia) ? "no" : "na"} ${base}`;
+    carr = `Carregamento efetuado ${d.carregamentoPor === "vendedor" ? "pelo vendedor" : "por nós"} ${quando}.`;
+  }
+  const g = saudacao() + ",";
+  const sub = rules.length ? `<ul>${rules.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : "";
+  const pl = prices.length ? prices.map((p, i) => `<li><b>${esc(p.label)}:</b> ${esc(p.val)}${i === prices.length - 1 ? sub : ""}</li>`).join("") : (sub ? `<li>${sub}</li>` : "");
+  const body = `<p>${g}</p><p>${esc(intro)}</p><ul>${pl}</ul>${carr ? `<p>${esc(carr)}</p>` : ""}`;
+  const html = `<div style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:11pt;color:#000;">${body}</div>`;
+  const text = [g, "", intro, "", ...prices.map(p => `  • ${p.label}: ${p.val}`), ...rules.map(r => "      ◦ " + r), "", carr].join("\n").trim();
+  return { ...recipients(d, "acordo"), subject: `Compra animais ${aoV(d)}`, html, text, outlookHtml: body };
+}
+function quadro(d, c){
+  const cols = c.cols;
+  const cnt = { M: cols.filter(x => x.lote.sexo === "M").length, F: cols.filter(x => x.lote.sexo === "F").length };
+  const head = x => cnt[x.lote.sexo] > 1 && x.lote.categoria ? loteNome(x.lote) : SEXO[x.lote.sexo];
+  const refLbl = ["M","F"].filter(s => cnt[s]).map(s => { const r = s === "M" ? d.refM : d.refF; return r ? `${SEXO[s]} - ${r}kg` : `${SEXO[s]} - sem referência`; }).join(" / ");
+  const both = cols.length > 1;
+  const m = f => cols.map(f);
+  const rows = [
+    { cells:["Peso referência", ...m(head)], head:true },
+    { cells:[refLbl, ...m(x => eur(x.preco))], price:true },
+    { cells:["Peso total (Kg)", ...m(x => kg(x.peso))], green:true },
+    { cells:[`${pctTxt(c.desc)} desconto`, ...m(x => kg(x.d))] },
+    { cells:["Peso líquido Total (Kg)", ...m(x => kg(x.liq))] },
+    { cells:["Peso médio(Kg)/Animal", ...m(x => kg(x.medio))] },
+    { cells:["Preço animal até Peso Referência", ...m(x => eur(x.ate))] },
+    { cells:["Preço animal acima Peso Referência", ...m(x => eur(x.ac))] },
+    { cells:["Preço por animal", ...m(x => eur(x.pa))], bold:true, sep:true, total: both ? "Total" : null, totalHead:true },
+    { cells:["Nº de animais", ...m(x => String(x.n))], bold:true, green:true, total: both ? String(c.tot.n) : null, big:true },
+    { cells:["Valor a faturar", ...m(x => eur(x.valor))], bold:true, total: both ? eur(c.tot.valor) : null, big:true },
+    { cells:[`IVA (${pctTxt(c.iva)})`, ...m(x => eur(x.iv))], bold:true, total: both ? eur(c.tot.iv) : null, big:true },
+    { cells:["Valor a faturar c/IVA", ...m(x => eur(x.total))], bold:true, total: both ? eur(c.tot.total) : null, big:true }
+  ];
+  return { rows, hasTotal: both };
+}
+function quadroHTML(q){
+  const b = "border:1px solid #A6A6A6;padding:4px 12px;font-family:Calibri,Carlito,Arial,sans-serif;font-size:11pt;color:#000;white-space:nowrap;";
+  let h = `<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:4px 0 12px;">`;
+  for (const r of q.rows){
+    const bg = r.green ? "background:#E2EFDA;" : "", fw = r.bold ? "font-weight:bold;" : "", sep = r.sep ? "border-top:2px solid #000;" : "";
+    h += "<tr>";
+    r.cells.forEach((v,i) => {
+      const al = (r.head || r.price) ? "text-align:center;" : i === 0 ? "text-align:left;" : "text-align:right;";
+      const fs = (r.price && i === 0) ? "font-size:12pt;" : "";
+      h += `<td style="${b}${bg}${fw}${sep}${al}${fs}">${esc(v)}</td>`;
+    });
+    if (q.hasTotal) h += r.total == null ? `<td style="border:none;padding:4px 12px;"></td>` : `<td style="${b}${fw}${sep}text-align:${r.totalHead ? "center" : "right"};${r.big ? "font-size:12pt;" : ""}">${esc(r.total)}</td>`;
+    h += "</tr>";
+  }
+  return h + "</table>";
+}
+function quadroOutlook(q){
+  let h = "<table>";
+  for (const r of q.rows){
+    const cell = v => r.bold ? `<b>${esc(v)}</b>` : esc(v);
+    const tag = r.head ? "th" : "td";
+    h += "<tr>" + r.cells.map(c => `<${tag}>${cell(c)}</${tag}>`).join("");
+    if (q.hasTotal) h += `<${tag}>${r.total == null ? "" : `<b>${esc(r.total)}</b>`}</${tag}>`;
+    h += "</tr>";
+  }
+  return h + "</table>";
+}
+function quadroText(q){
+  const rows = q.rows.map(r => q.hasTotal ? [...r.cells, r.total ?? ""] : r.cells);
+  const w = rows[0].map((_,i) => Math.max(...rows.map(r => (r[i]||"").length)));
+  return rows.map(r => r.map((v,i) => i === 0 ? v.padEnd(w[i]) : v.padStart(w[i])).join("   ").trimEnd()).join("\n");
+}
+function emailValores(d, c){
+  const q = quadro(d, c);
+  const sirca = (d.condicoes || []).some(x => /sirca/i.test(x));
+  const g = saudacao() + ",";
+  const intro = `Seguem os valores referentes à compra de ${c.tot.n} animais ${aoV(d)}:`;
+  const sircaTxt = "Terá de ser feito ainda o desconto das taxas Sirca que não consta no quadro acima (ex: nota de crédito).";
+  const fat = [`Nome: ${S.cfg.empresa}`, `Contribuinte: ${S.cfg.nif}`, `Morada: ${S.cfg.morada}`];
+  const html = `<div style="font-family:Calibri,Carlito,Arial,sans-serif;font-size:11pt;color:#000;"><p>${g}</p><p>${esc(intro)}</p>${quadroHTML(q)}${sirca ? `<p>${esc(sircaTxt)}</p>` : ""}<p>Dados para faturação:<br>${fat.map(esc).join("<br>")}</p></div>`;
+  const text = [g, "", intro, "", quadroText(q), "", sirca ? sircaTxt : null, sirca ? "" : null, "Dados para faturação:", ...fat].filter(x => x !== null).join("\n");
+  const outlookHtml = `<p>${g}</p><p>${esc(intro)}</p>${quadroOutlook(q)}${sirca ? `<p>${esc(sircaTxt)}</p>` : ""}<p>Dados para faturação:<br>${fat.map(esc).join("<br>")}</p>`;
+  return { ...recipients(d, "valores"), subject: `Valores compra animais ${aoV(d)}`, html, text, outlookHtml };
+}
+
+/* ---------- copiar ---------- */
+async function copyText(t){
+  try { await navigator.clipboard.writeText(t); return true; } catch(e){}
+  const ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.left = "-9999px";
+  document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch(e){} ta.remove(); return ok;
+}
+async function copyRich(html, text){
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ "text/html": new Blob([html], {type:"text/html"}), "text/plain": new Blob([text], {type:"text/plain"}) })]);
+    return true;
+  } catch(e){}
+  const div = document.createElement("div"); div.contentEditable = "true"; div.innerHTML = html;
+  div.style.position = "fixed"; div.style.left = "-9999px"; div.style.background = "#fff"; document.body.appendChild(div);
+  const r = document.createRange(); r.selectNodeContents(div); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  let ok = false; try { ok = document.execCommand("copy"); } catch(e){} s.removeAllRanges(); div.remove();
+  return ok || copyText(text);
+}
+async function doCopy(spec){
+  const [key, part] = spec.split(":"); const m = MAILS[key]; if (!m) return;
+  let ok;
+  if (part === "body") ok = await copyRich(m.html, m.text);
+  else if (part === "subject") ok = await copyText(m.subject);
+  else ok = await copyText((m[part] || []).join("; "));
+  toast(ok ? (part === "body" ? "Email copiado. Cola-o no corpo da mensagem." : "Copiado.") : "Não foi possível copiar. Seleciona o texto à mão.");
+}
+function b64utf8(str){
+  const bytes = new TextEncoder().encode(str); let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function buildEml(m){
+  const hdr = v => /^[\x20-\x7e]*$/.test(v) ? v : "=?UTF-8?B?" + b64utf8(v) + "?=";
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>${m.html}</body></html>`;
+  const body = b64utf8(html).replace(/.{76}/g, "$&\r\n");
+  return [
+    "X-Unsent: 1",
+    "To: " + m.to.join(", "),
+    m.cc.length ? "Cc: " + m.cc.join(", ") : null,
+    "Subject: " + hdr(m.subject),
+    "MIME-Version: 1.0",
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    body
+  ].filter(x => x !== null).join("\r\n");
+}
+function downloadEml(key){
+  const m = MAILS[key]; if (!m) return;
+  const name = m.subject.replace(/[\\/:*?"<>|]+/g, "").replace(/\s+/g, " ").trim() || "email";
+  const url = URL.createObjectURL(new Blob([buildEml(m)], { type: "message/rfc822" }));
+  const a = document.createElement("a"); a.href = url; a.download = name + ".eml";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast("Email descarregado. Abre-o para continuar no Outlook.");
+}
+function mailBox(m, key){
+  MAILS[key] = m;
+  const drafted = cur()?.drafts?.[key];
+  const when = drafted ? new Date(drafted).toLocaleString("pt-PT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
+  const row = (lbl, val, part) => `<div><dt>${lbl}</dt><dd>${val ? esc(val) : `<span class="warn">Sem destinatários. Define-os em Definições.</span>`}</dd>${val ? `<button class="linkbtn" data-copy="${key}:${part}">Copiar</button>` : "<span></span>"}</div>`;
+  const mailto = "mailto:" + m.to.map(encodeURIComponent).join(";") + "?" + [m.cc.length ? "cc=" + m.cc.map(encodeURIComponent).join(";") : "", "subject=" + encodeURIComponent(m.subject)].filter(Boolean).join("&");
+  return `<dl class="mailhdr">${row("Para", m.to.join("; "), "to")}${row("Cc", m.cc.join("; "), "cc")}${row("Assunto", m.subject, "subject")}</dl>
+  <div class="mail">${m.html}</div>
+  <div class="actions"><button class="btn" data-eml="${key}">Abrir no Outlook</button><a class="btn ghost" href="${esc(mailto)}" data-copyfirst="${key}:body">Abrir só com destinatários</a></div>
+  <p class="muted small" style="margin-top:10px">Abrir no Outlook descarrega o email e abre-o no Outlook já completo, pronto a rever e enviar. Na primeira vez, no Chrome ou no Edge, escolhe abrir sempre ficheiros deste tipo, e das próximas abre logo.</p>`;
+}
+
+/* ---------- guardar ---------- */
+function loadLocal(){
+  try { S.deals = JSON.parse(localStorage.getItem("mp-negocios") || "[]"); } catch(e){ S.deals = []; }
+  try { const c = JSON.parse(localStorage.getItem("mp-config") || "null"); if (c) S.cfg = { ...DEFAULT_CFG, ...c }; } catch(e){}
+}
+function saveLocal(){ try { localStorage.setItem("mp-negocios", JSON.stringify(S.deals)); localStorage.setItem("mp-config", JSON.stringify(S.cfg)); } catch(e){} }
+function errMsg(e){ return e && e.code === "invalid_argument" ? "Não foi possível guardar." : e && e.code === "quota_exceeded" ? "O armazenamento está cheio. Exporta e apaga negócios antigos." : "Não foi possível guardar. Tenta outra vez."; }
+async function saveDeal(d){
+  const body = JSON.parse(JSON.stringify(d)); delete body.id;
+  if (db){
+    const ref = d.id ? db.doc("negocios/" + d.id) : db.collection("negocios").doc();
+    await ref.set(body); d.id = ref.id;
+  } else if (!d.id) d.id = "n" + Date.now().toString(36);
+  const i = S.deals.findIndex(x => x.id === d.id);
+  if (i >= 0) S.deals[i] = { ...d }; else S.deals.unshift({ ...d });
+  if (!db) saveLocal();
+  return d.id;
+}
+async function deleteDeal(id){
+  if (db) await db.doc("negocios/" + id).delete();
+  S.deals = S.deals.filter(x => x.id !== id); if (!db) saveLocal();
+}
+
+/* ---------- Claude ---------- */
+function refreshAssist(){
+  document.querySelectorAll("[data-assist]").forEach(el => el.hidden = false);
+  const mb = $("#mic_btn"); if (mb) mb.hidden = false;
+}
+/* ---------- ditado por voz ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+const MIC_ON = "A ouvir… fala à vontade e carrega em Parar no fim.";
+function stopMic(){ if (rec){ try { rec.abort(); } catch(e){} rec = null; } }
+function dictHint(){
+  const ua = navigator.userAgent;
+  if (/Windows/.test(ua)) return "Para ditar no PC: com o cursor na caixa de texto, carrega nas teclas Windows + H, fala, e o texto aparece na caixa.";
+  if (/Macintosh/.test(ua)) return "Para ditar no Mac: com o cursor na caixa de texto, carrega duas vezes na tecla Fn (ou Globo) e fala.";
+  return "Para ditar: toca na caixa de texto e usa o microfone do teclado.";
+}
+function toggleMic(btn){
+  if (rec){ rec.stop(); return; }
+  if (!SR){ const ta0 = $("#ai_txt"); ta0.focus(); $("#ai_status").textContent = dictHint(); return; }
+  const ta = $("#ai_txt"), st = $("#ai_status");
+  const base = ta.value.trim() ? ta.value.trim() + " " : "";
+  let finalTxt = "";
+  rec = new SR(); rec.lang = "pt-PT"; rec.continuous = true; rec.interimResults = true;
+  rec.onresult = e => {
+    let interim = "";
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const r = e.results[i];
+      if (r.isFinal) finalTxt += r[0].transcript.trim() + " "; else interim += r[0].transcript;
+    }
+    ta.value = base + finalTxt + interim;
+  };
+  rec.onerror = e => {
+    if (e.error === "aborted") return;
+    if (e.error === "no-speech"){ st.textContent = "Não ouvi nada. Carrega em Falar e tenta outra vez."; return; }
+    st.textContent = "O navegador não deixou usar o microfone aqui. " + dictHint(); ta.focus();
+  };
+  rec.onend = () => {
+    rec = null;
+    if (btn.isConnected){ btn.textContent = "Falar"; btn.setAttribute("aria-pressed", "false"); }
+    if (st.textContent === MIC_ON) st.textContent = ta.value.trim() ? "Revê o texto e carrega no botão ao lado." : "";
+  };
+  try { rec.start(); } catch(e){ rec = null; st.textContent = "O ditado não arrancou. Tenta outra vez."; return; }
+  btn.textContent = "Parar"; btn.setAttribute("aria-pressed", "true"); st.textContent = MIC_ON;
+}
+/* ---------- leitura do texto (sem Claude) ---------- */
+const NUM_RE = "(\\d{1,3}(?:[.\\s]\\d{3})+(?:,\\d+)?|\\d+(?:[.,]\\d+)?)";
+function normTrat(t){
+  t = t.replace(/\s+/g, "");
+  const k = t.toLowerCase().replace(/\.$/, "");
+  const map = { sr:"Sr.", sra:"Sra.", senhor:"Sr.", senhora:"Sra.", prof:"Prof.", "prof.ª":"Prof.ª", professor:"Prof.", professora:"Prof.ª", eng:"Eng.", "eng.ª":"Eng.ª", engenheiro:"Eng.", engenheira:"Eng.ª", dr:"Dr.", dra:"Dra.", doutor:"Dr.", doutora:"Dra.", d:"D.", dona:"D." };
+  return map[k] || t;
+}
+const DIAS = ["domingo","segunda","terça","quarta","quinta","sexta","sábado"];
+const MESES = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+function parseData(t){
+  const low = t.toLowerCase();
+  if (/depois de amanh[ãa]/.test(low)) return addDays(2);
+  if (/amanh[ãa]/.test(low)) return addDays(1);
+  if (/\bhoje\b/.test(low)) return addDays(0);
+  let m = low.match(/\b(\d{1,2})\s*(?:\/|-|de\s+)\s*(\d{1,2}|janeiro|fevereiro|março|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s*(?:\/|-|de\s+)\s*(\d{2,4}))?/);
+  if (m){
+    const dia = +m[1]; let mes = /^\d+$/.test(m[2]) ? +m[2] : MESES.indexOf(m[2].replace("marco","março")) + 1;
+    let ano = m[3] ? +m[3] : new Date().getFullYear(); if (ano < 100) ano += 2000;
+    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12) return `${ano}-${String(mes).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+  }
+  m = low.match(/\b(segunda|terça|terca|quarta|quinta|sexta|sábado|sabado|domingo)/);
+  if (m){
+    const alvo = DIAS.indexOf(m[1].replace("terca","terça").replace("sabado","sábado"));
+    const hoje = new Date().getDay(); let dif = (alvo - hoje + 7) % 7; if (dif === 0) dif = 7;
+    return addDays(dif);
+  }
+  return null;
+}
+function parseDeal(txt){
+  const out = { achou: [] };
+  let m = txt.match(/(?:^|[\s,.;(])(?:ao|à|a|do|da|com o|com a)\s+(Sra?\.?|Senhora?|Prof(?:\.ª|essora|essor|\.)?|Eng(?:\.ª|enheira|enheiro|\.)?|Dra?\.?|Doutora?|D\.|Dona)\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]+(?:\s+(?:(?:de|da|do|dos|das|e)\s+)?[A-ZÀ-Ý][A-Za-zÀ-ÿ'-]+)*)/);
+  if (m){ out.tratamento = normTrat(m[1]); out.vendedor = m[2].trim(); out.achou.push("vendedor"); }
+  m = txt.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/); if (m){ out.emailVendedor = m[0]; out.achou.push("email"); }
+  m = txt.match(/(\d+)\s*(?:animais|cabe[çc]as|cab\.?|bezerr[oa]s|vitel[oa]s|novilh[oa]s|vacas|bois)\b/i); if (m){ out.nAnimais = +m[1]; out.achou.push("nº de animais"); }
+  // preços: percorre sexo, categoria e preço por ordem
+  const tok = /(machos?|f[eê]meas?)|\b(g\s?\d)\b|(\d+[.,]\d{1,2})(?!\d)(?!\s*(?:%|kg\b|cab|animais))/gi;
+  let sexo = null, cat = null, t; const lotes = [];
+  const corte = txt.search(/barriga|desconto|metade|acima|carreg/i);
+  const zona = corte > 0 ? txt.slice(0, corte) : txt;
+  while ((t = tok.exec(zona))){
+    if (t[1]){ sexo = /^m/i.test(t[1]) ? "M" : "F"; cat = null; }
+    else if (t[2]) cat = t[2].toUpperCase().replace(/\s/g, "");
+    else if (t[3] && sexo){ const p = num(t[3]); if (p > 0.5 && p < 50){ lotes.push({ id:newId(), sexo, categoria: cat || S.cfg.categoria || "", preco: p }); cat = null; } }
+  }
+  if (lotes.length){ out.lotes = lotes; out.achou.push(lotes.length === 1 ? "1 preço" : lotes.length + " preços"); }
+  m = txt.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:de\s+)?(?:desconto\s+)?(?:d[ae]\s+|para\s+a\s+)?barriga/i) || txt.match(/barriga\s*(?:de\s*)?(\d+(?:[.,]\d+)?)\s*%/i);
+  if (m){ out.desconto = num(m[1]); out.achou.push("desconto"); }
+  if (/metade/i.test(txt)){ out.acima = 50; }
+  else { m = txt.match(/(\d+)\s*%\s*(?:do pre[çc]o\s*)?(?:n?os\s+)?kg\s+acima/i); if (m) out.acima = +m[1]; }
+  m = txt.match(/\b(\d{3})\s*(?:kg)?\s*\/\s*(\d{3})\b/);
+  if (m){ out.refM = +m[1]; out.refF = +m[2]; out.achou.push("pesos de referência"); }
+  else {
+    const rm = txt.match(/(\d{3})\s*(?:kg)?\s*(?:para\s+)?(?:os\s+)?machos/i), rf = txt.match(/(\d{3})\s*(?:kg)?\s*(?:para\s+)?(?:as\s+)?f[eê]meas/i);
+    if (rm) out.refM = +rm[1]; if (rf) out.refF = +rf[1]; if (rm || rf) out.achou.push("pesos de referência");
+  }
+  const dt = parseData(txt); if (dt){ out.dataCarregamento = dt; out.achou.push("data"); }
+  if (/vendedor\s+(?:entrega|carrega|traz|transporta)|pelo vendedor|entregues?\s+pelo|ele\s+(?:entrega|carrega|traz)/i.test(txt)) out.carregamentoPor = "vendedor";
+  else if (/carregamos|vamos buscar|por n[óo]s|transporte nosso|nosso transporte/i.test(txt)) out.carregamentoPor = "nos";
+  return out;
+}
+function parsePeso(txt, L){
+  const res = {};
+  const tok = new RegExp("(machos?|f[eê]meas?)|\\b(g\\s?\\d)\\b|(\\d+)\\s*(?:cab(?:e[çc]as)?\\.?|animais|bezerr[oa]s|un\\.?)(?![a-z])|" + NUM_RE + "\\s*kg", "gi");
+  let sexo = null, cat = null, t;
+  const alvo = () => {
+    if (!sexo) return null;
+    const doSexo = L.filter(l => l.sexo === sexo);
+    if (cat){ const c = doSexo.find(l => (l.categoria || "").toUpperCase() === cat); if (c) return c.id; }
+    return doSexo.length === 1 ? doSexo[0].id : (doSexo[0] && !cat ? doSexo[0].id : null);
+  };
+  while ((t = tok.exec(txt))){
+    if (t[1]){ sexo = /^m/i.test(t[1]) ? "M" : "F"; cat = null; }
+    else if (t[2]) cat = t[2].toUpperCase().replace(/\s/g, "");
+    else if (t[3]){ const id = alvo(); if (id){ res[id] = res[id] || {}; res[id].n = (res[id].n || 0) + (+t[3]); } }
+    else if (t[4]){ const id = alvo(); if (id){ res[id] = res[id] || {}; res[id].peso = r2((res[id].peso || 0) + num(t[4])); } }
+  }
+  return res;
+}
+async function aiDeal(){
+  const txt = $("#ai_txt").value.trim(), st = $("#ai_status");
+  if (!txt){ st.textContent = "Escreve primeiro o negócio na caixa acima."; return; }
+  readForm();
+  const j = parseDeal(txt), d = S.draft;
+  ["tratamento","vendedor","emailVendedor","nAnimais","lotes","desconto","acima","refM","refF","dataCarregamento","carregamentoPor"].forEach(k => { if (j[k] !== undefined && j[k] !== null) d[k] = j[k]; });
+  render(); $("#ai_txt").value = txt;
+  $("#ai_status").textContent = j.achou.length ? `Preenchi: ${j.achou.join(", ")}. Confirma tudo antes de guardar.` : "Não consegui tirar dados do texto. Preenche os campos à mão.";
+}
+const PESO_EX = "machos 9 cab. 2159,9 kg; fêmeas 11 cab. 2580,1 kg";
+function aiPeso(){
+  const d = cur(); if (!d) return;
+  const L = lotesOf(d), txt = $("#ai_txt").value.trim(), st = $("#ai_status");
+  if (!txt){ st.textContent = "Escreve ou cola os pesos primeiro."; return; }
+  const res = parsePeso(txt, L); let n = 0;
+  for (const [id, x] of Object.entries(res)){
+    if (x.peso != null){ $("#g_p_" + id).value = String(x.peso).replace(".", ","); n++; }
+    if (x.n != null) $("#g_n_" + id).value = String(x.n);
+  }
+  updateResult();
+  st.textContent = n ? "Pesos preenchidos. Confirma com o talão." : "Não encontrei pesos no texto. Escreve por exemplo: machos G1 9 cab. 2159,9 kg.";
+}
+
+/* ---------- vistas ---------- */
+function newDraft(){
+  const c = S.cfg;
+  return { tratamento:"Sr.", vendedor:"", emailVendedor:"", nAnimais:null,
+    lotes:[{ id:newId(), sexo:"M", categoria:c.categoria, preco:null }, { id:newId(), sexo:"F", categoria:c.categoria, preco:null }],
+    refM:c.refM, refF:c.refF, desconto:c.desconto, acima:c.acima, dataCarregamento:addDays(1), carregamentoPor:"nos", condicoes:[...c.condicoes], observacoes:[], estado:"aberto" };
+}
+const v = x => x == null ? "" : String(x).replace(".", ",");
+function fld(id, label, val, cls = "", type = "text", extra = ""){
+  return `<label class="f ${cls}">${label}<input id="${id}" type="${type}" value="${esc(val)}" ${extra}></label>`;
+}
+function assistBox(kind){
+  if (kind === "deal") return `<section class="assist" data-assist hidden>
+    <h2>Descreve o negócio por palavras tuas</h2>
+    <p class="muted small">Troca no texto o que for diferente neste negócio. A página preenche os campos abaixo e revês tudo antes de guardar.</p>
+    <textarea id="ai_txt" rows="3">${esc(`Comprei 53 animais ao Sr. António Páscoa. Machos a 5,40 e fêmeas a 4,35, ${v(S.cfg.desconto)}% de barriga, metade acima dos ${v(S.cfg.refM)}/${v(S.cfg.refF)} kg. Carregamos amanhã.`)}</textarea>
+    <div class="row"><button class="btn ghost" id="mic_btn" data-act="mic" aria-pressed="false" hidden>Falar</button><button class="btn" id="ai_btn" data-act="ai-deal">Preencher campos</button><span class="status" id="ai_status" aria-live="polite"></span></div></section>`;
+  return `<section class="assist" data-assist hidden>
+    <h2>Ler a pesagem</h2>
+    <p class="muted small">Troca os números no texto pelos da pesagem. Se houver G1 e G2, escreve por exemplo: machos G1 4 cab. 1198,4 kg; machos G2 1 cab. 299,6 kg.</p>
+    <textarea id="ai_txt" rows="3">${esc(PESO_EX)}</textarea>
+    <div class="row"><button class="btn ghost" id="mic_btn" data-act="mic" aria-pressed="false" hidden>Falar</button><button class="btn" id="ai_btn" data-act="ai-peso">Ler pesos</button><span class="status" id="ai_status" aria-live="polite"></span></div></section>`;
+}
+function viewLista(){
+  let h = `<div class="head"><div><h1>Negócios</h1><p class="lead">Cada compra leva dois emails: o do acordo, quando se fecham as condições com o vendedor, e o dos valores, depois da pesagem.</p></div><button class="btn" data-go="novo">Novo negócio</button></div>`;
+  if (S.loading) return h + `<p class="muted">A carregar negócios…</p>`;
+  if (!S.deals.length) return h + `<div class="panel empty"><p><strong>Ainda não há negócios registados.</strong></p><p class="muted">Regista o primeiro quando chegares a acordo com um vendedor. O email de acordo fica logo pronto a enviar.</p><div class="actions"><button class="btn" data-go="novo">Registar negócio</button></div></div>`;
+  const row = d => {
+    const fech = d.estado === "fechado"; const c = fech ? calcDeal(d) : null;
+    const meta = [fech ? `${c.tot.n} animais` : d.nAnimais ? `cerca de ${d.nAnimais} animais` : null, d.dataCarregamento ? `carregamento a ${dateShort(d.dataCarregamento)}` : null].filter(Boolean).join(", ");
+    return `<button class="deal" data-open="${esc(d.id)}"><span class="dn">${esc(nomeV(d) || "Sem nome")}</span><span class="badge ${fech ? "done" : ""}">${fech ? "Fechado" : "À espera de pesos"}</span><span class="dm">${esc(meta)}</span>${fech && c.ok ? `<span class="dv">${eur(c.tot.total)}</span>` : "<span></span>"}</button>`;
+  };
+  const open = S.deals.filter(d => d.estado !== "fechado"), closed = S.deals.filter(d => d.estado === "fechado");
+  if (open.length) h += `<section class="list"><h2>À espera de pesos</h2>${open.map(row).join("")}</section>`;
+  if (closed.length) h += `<section class="list"><h2>Fechados</h2>${closed.map(row).join("")}</section>`;
+  return h;
+}
+function loteRow(l){
+  return `<div class="loterow" data-lote="${esc(l.id)}">
+    <label class="f">Sexo<select class="l_sexo"><option value="M" ${l.sexo === "M" ? "selected" : ""}>Machos</option><option value="F" ${l.sexo === "F" ? "selected" : ""}>Fêmeas</option></select></label>
+    <label class="f">Categoria<input class="l_cat" value="${esc(l.categoria)}" placeholder="G1"></label>
+    <label class="f">Preço (€/kg)<input class="l_preco" inputmode="decimal" value="${esc(v(l.preco))}"></label>
+    <button class="linkbtn rm" data-act="rm-lote" data-id="${esc(l.id)}">Remover</button>
+  </div>`;
+}
+function viewForm(){
+  const d = S.draft;
+  return `<div class="head"><div><h1>${d.id ? "Editar negócio" : "Novo negócio"}</h1><p class="lead">Preenche as condições acordadas com o vendedor. Ao guardar, o email de acordo fica pronto a copiar.</p></div></div>
+  ${assistBox("deal")}
+  <div class="panel">
+    <h3>Vendedor</h3>
+    <div class="fields">
+      <label class="f">Tratamento<input id="f_tratamento" list="tratamentos" value="${esc(d.tratamento)}" placeholder="Sr."></label>
+      <datalist id="tratamentos"><option value="Sr."><option value="Sra."><option value="Prof."><option value="Eng."><option value="Dr."><option value="Dra."></datalist>
+      ${fld("f_vendedor","Nome",d.vendedor,"w2","text",'autocomplete="off"')}
+      ${fld("f_emailVendedor","Email do vendedor",d.emailVendedor,"w2","email")}
+      ${fld("f_nAnimais","Nº aproximado de animais",v(d.nAnimais),"","text",'inputmode="numeric"')}
+    </div>
+    <h3>Preços</h3>
+    <p class="muted small">Uma linha por cada preço diferente. Se no mesmo sexo houver G1 e G2 a preços diferentes, põe uma linha para cada.</p>
+    <div id="lotes">${(d.lotes || []).map(loteRow).join("")}</div>
+    <button class="btn ghost" data-act="add-lote">Adicionar preço</button>
+    <h3>Regras</h3>
+    <div class="fields">
+      ${fld("f_refM","Peso ref. machos (kg)",v(d.refM),"","text",'inputmode="decimal"')}
+      ${fld("f_refF","Peso ref. fêmeas (kg)",v(d.refF),"","text",'inputmode="decimal"')}
+      ${fld("f_desconto","Desconto barriga (%)",v(d.desconto),"","text",'inputmode="decimal"')}
+      ${fld("f_acima","Kg acima da ref. pagos a (%)",v(d.acima),"","text",'inputmode="decimal"')}
+    </div>
+    <h3>Carregamento</h3>
+    <div class="fields">
+      ${fld("f_data","Data",d.dataCarregamento||"","","date")}
+      <label class="f">Feito por<select id="f_por"><option value="nos" ${d.carregamentoPor!=="vendedor"?"selected":""}>Nós</option><option value="vendedor" ${d.carregamentoPor==="vendedor"?"selected":""}>Vendedor</option></select></label>
+    </div>
+    <h3>Condições</h3>
+    <label class="f wide">Uma por linha. Vêm das Definições e podes ajustar para este negócio.<textarea id="f_condicoes" rows="8">${esc((d.condicoes||[]).join("\n"))}</textarea></label>
+    <label class="f wide" style="margin-top:14px">Outras condições deste negócio (opcional, uma por linha)<textarea id="f_obs" rows="3">${esc((d.observacoes||[]).join("\n"))}</textarea></label>
+    <p class="warn" id="f_err" aria-live="polite"></p>
+    <div class="actions"><button class="btn" data-act="save-deal">Guardar e ver email</button><button class="btn ghost" data-act="cancel-form">Cancelar</button></div>
+  </div>`;
+}
+function readForm(){
+  const d = S.draft, g = id => $("#" + id)?.value ?? "";
+  Object.assign(d, {
+    tratamento: g("f_tratamento").trim(), vendedor: g("f_vendedor").trim(), emailVendedor: g("f_emailVendedor").trim(),
+    nAnimais: num(g("f_nAnimais")),
+    lotes: [...document.querySelectorAll(".loterow")].map(r => ({ id: r.dataset.lote, sexo: r.querySelector(".l_sexo").value, categoria: r.querySelector(".l_cat").value.trim(), preco: num(r.querySelector(".l_preco").value) })),
+    refM: num(g("f_refM")), refF: num(g("f_refF")), desconto: num(g("f_desconto")) ?? 0, acima: num(g("f_acima")) ?? 100,
+    dataCarregamento: g("f_data"), carregamentoPor: g("f_por"), condicoes: lines(g("f_condicoes")), observacoes: lines(g("f_obs"))
+  });
+  delete d.precoM; delete d.precoF; delete d.categoria;
+  return d;
+}
+function viewNegocio(){
+  const d = cur(); if (!d) return `<p>Este negócio já não existe.</p><div class="actions"><button class="btn ghost" data-go="lista">Voltar aos negócios</button></div>`;
+  const F = fechoOf(d), fech = d.estado === "fechado", L = lotesOf(d);
+  const meta = [d.nAnimais ? `Cerca de ${d.nAnimais} animais` : null, ...L.map(l => `${loteNome(l).toLowerCase()} ${priceKg(l.preco)}`), d.dataCarregamento ? `carregamento a ${dateLong(d.dataCarregamento)}` : null].filter(Boolean).join(", ");
+  const inp = (id, val, lbl, mode) => `<input id="${id}" inputmode="${mode}" value="${esc(v(val))}" aria-label="${esc(lbl)}">`;
+  return `<div class="head"><div><h1>${esc(nomeV(d))}</h1><p class="meta">${esc(meta)}</p><p class="meta small" id="criador"></p></div>
+    <div class="actions" style="margin:0"><button class="btn ghost" data-act="edit">Editar condições</button><button class="btn ghost danger" data-act="del">Apagar</button></div></div>
+  <section class="step"><div class="stepn">1</div><details ${d.fecho ? "" : "open"}><summary><div><h2>Email de acordo</h2><span class="muted small">Enviar quando se fecham as condições.</span></div></summary><div class="stepbody">${mailBox(emailAcordo(d), "acordo")}</div></details></section>
+  <section class="step"><div class="stepn">2</div><div class="stepbox">
+    <h2>Valores finais</h2><p class="muted small">Depois da pesagem, mete o peso total e o número de animais de cada lote. O quadro e o email fazem-se sozinhos.</p>
+    ${assistBox("peso")}
+    <h3>Pesagem</h3>
+    <div class="lotegrid">
+      <div class="lg-h lg-first"></div><div class="lg-h">Peso total (kg)</div><div class="lg-h">Nº de animais</div><div class="lg-h">Preço (€/kg)</div>
+      ${L.map(l => { const x = (F.l || {})[l.id] || {}, n = loteNome(l); return `<div class="lg-n">${esc(n)}</div>${inp("g_p_" + l.id, x.peso, "Peso total " + n, "decimal")}${inp("g_n_" + l.id, x.n, "Nº de animais " + n, "numeric")}${inp("g_c_" + l.id, x.preco ?? l.preco, "Preço " + n, "decimal")}`; }).join("")}
+    </div>
+    <div class="fields" style="margin-top:14px">${fld("g_iva","IVA (%)",v(F.iva ?? S.cfg.iva),"","text",'inputmode="decimal"')}</div>
+    <div id="result"></div>
+    <div class="actions"><button class="btn ghost" data-act="save-fecho">Guardar pesos</button>${fech ? `<button class="btn ghost" data-act="reabrir">Reabrir negócio</button>` : `<button class="btn" data-act="fechar">Guardar e marcar como fechado</button>`}</div>
+  </div></section>`;
+}
+function readFecho(){
+  const g = id => num($("#" + id)?.value);
+  const d = cur();
+  return { l: Object.fromEntries(lotesOf(d || {}).map(l => [l.id, { peso: g("g_p_" + l.id), n: g("g_n_" + l.id), preco: g("g_c_" + l.id) }])), iva: g("g_iva") ?? S.cfg.iva };
+}
+function updateResult(){
+  const d = cur(), box = $("#result"); if (!d || !box) return;
+  const c = calcDeal(d, readFecho());
+  if (!c.ok){ box.innerHTML = `<p class="muted" style="margin-top:18px">Mete pelo menos o peso total, o número de animais e o preço de um dos sexos.</p>`; return; }
+  box.innerHTML = `<div class="totalline"><span class="totalbig">${eur(c.tot.total)}</span><span class="totalsub">a pagar com IVA, ${c.tot.n} animais, ${eur(c.tot.valor)} sem IVA</span></div>
+    <h3>Email de valores</h3>${mailBox(emailValores(d, c), "valores")}`;
+}
+function viewDefs(){
+  const c = S.cfg;
+  return `<div class="head"><div><h1>Definições</h1><p class="lead">Ficam guardadas neste computador. Alterar aqui não muda negócios já registados.</p></div></div>
+  <div class="panel">
+    <h3>Destinatários</h3>
+    <div class="fields">
+      <label class="f wide">Faturação: vai em Para no email de acordo e em Cc no de valores<textarea id="d_fat" rows="2">${esc(c.faturacao)}</textarea></label>
+      <label class="f wide">Equipa: vai em Cc no email de acordo e em Para no de valores<textarea id="d_eq" rows="5">${esc(c.equipa)}</textarea></label>
+    </div>
+    <p class="muted small" style="margin-top:8px">Separa os endereços por vírgula, ponto e vírgula ou linha. O email do vendedor junta-se sozinho.</p>
+    <h3>Dados para faturação</h3>
+    <div class="fields">${fld("d_emp","Nome",c.empresa,"w2")}${fld("d_nif","Contribuinte",c.nif)}${fld("d_mor","Morada",c.morada,"wide")}</div>
+    <h3>Valores habituais num negócio novo</h3>
+    <div class="fields">${fld("d_cat","Categoria",c.categoria)}${fld("d_refM","Peso ref. machos (kg)",v(c.refM))}${fld("d_refF","Peso ref. fêmeas (kg)",v(c.refF))}${fld("d_desc","Desconto barriga (%)",v(c.desconto))}${fld("d_acima","Kg acima da ref. pagos a (%)",v(c.acima))}${fld("d_iva","IVA (%)",v(c.iva))}</div>
+    <h3>Condições habituais</h3>
+    <label class="f wide">Uma por linha<textarea id="d_cond" rows="9">${esc((c.condicoes||[]).join("\n"))}</textarea></label>
+    <div class="actions"><button class="btn" data-act="save-defs">Guardar definições</button></div>
+    <h3 style="margin-top:32px">Cópia de segurança e passagem para outro PC</h3>
+    <p class="muted small">Os negócios e as definições ficam só neste navegador. Exporta para guardar uma cópia ou para passar tudo para outro computador, e lá importa o ficheiro.</p>
+    <div class="actions"><button class="btn ghost" data-act="export">Exportar ficheiro</button><label class="btn ghost" style="cursor:pointer">Importar ficheiro<input id="imp_file" type="file" accept=".json,application/json" hidden></label></div>
+    <p class="small" id="imp_status" aria-live="polite" style="margin-top:10px"></p>
+  </div>`;
+}
+
+/* ---------- render e eventos ---------- */
+function render(){
+  stopMic();
+  document.querySelectorAll("nav button").forEach(b => b.toggleAttribute("aria-current", false));
+  const navKey = S.view === "negocio" ? "lista" : S.view === "form" ? (S.draft?.id ? "lista" : "novo") : S.view;
+  const nb = document.querySelector(`nav button[data-go="${navKey}"]`); if (nb) nb.setAttribute("aria-current", "page");
+  const m = $("#main");
+  m.innerHTML = S.view === "form" ? viewForm() : S.view === "negocio" ? viewNegocio() : S.view === "definicoes" ? viewDefs() : viewLista();
+  refreshAssist();
+  if (S.view === "negocio"){
+    updateResult();
+    const d = cur();
+    if (d?.criadoPor && user) user.profiles([d.criadoPor]).then(ps => { const el = $("#criador"); if (el) el.textContent = "Registado por " + (ps[d.criadoPor]?.name || "um colega"); }).catch(() => {});
+  }
+}
+function go(view, id){
+  S.view = view; if (id !== undefined) S.currentId = id;
+  if (view === "novo"){ S.view = "form"; S.draft = newDraft(); }
+  render(); window.scrollTo(0, 0);
+}
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-go],[data-open],[data-act],[data-copy],[data-copyfirst],[data-eml]"); if (!t) return;
+  if (t.dataset.eml){ downloadEml(t.dataset.eml); return; }
+  if (t.dataset.seq){ seqCopy(t); return; }
+  if (t.dataset.draft) return createDraft(t.dataset.draft, t);
+  if (t.dataset.copyfirst){ doCopy(t.dataset.copyfirst); return; }
+  if (t.dataset.copy){ doCopy(t.dataset.copy); return; }
+  if (t.dataset.go) return go(t.dataset.go);
+  if (t.dataset.open) return go("negocio", t.dataset.open);
+  const a = t.dataset.act;
+  if (a === "mic") return toggleMic(t);
+  if (a === "ai-deal"){ stopMic(); return aiDeal(); }
+  if (a === "ai-peso"){ stopMic(); return aiPeso(); }
+  if (a === "cancel-form") return S.draft?.id ? go("negocio", S.draft.id) : go("lista");
+  if (a === "edit"){ const dd = JSON.parse(JSON.stringify(cur())); dd.lotes = lotesOf(dd); if (dd.fecho) dd.fecho = fechoOf(dd); delete dd.precoM; delete dd.precoF; delete dd.categoria; S.draft = dd; S.view = "form"; render(); window.scrollTo(0,0); return; }
+  if (a === "add-lote" || a === "rm-lote"){
+    const keep = $("#ai_txt")?.value; readForm();
+    if (a === "add-lote"){ const last = S.draft.lotes[S.draft.lotes.length - 1]; S.draft.lotes.push({ id:newId(), sexo: last ? last.sexo : "M", categoria:"G2", preco:null }); }
+    else S.draft.lotes = S.draft.lotes.filter(l => l.id !== t.dataset.id);
+    const y = window.scrollY; render(); window.scrollTo(0, y); if (keep != null && $("#ai_txt")) $("#ai_txt").value = keep; return;
+  }
+  if (a === "save-deal"){
+    const d = readForm();
+    if (!d.vendedor){ $("#f_err").textContent = "Falta o nome do vendedor."; $("#f_vendedor").focus(); return; }
+    if (!(d.lotes || []).some(l => l.preco)){ $("#f_err").textContent = "Falta pelo menos um preço por kg."; return; }
+    d.lotes = d.lotes.filter(l => l.preco);
+    if (!d.id){ d.criadoEm = Date.now(); if (uid) d.criadoPor = uid; }
+    t.disabled = true;
+    try { const id = await saveDeal(d); toast("Negócio guardado."); go("negocio", id); }
+    catch(err){ $("#f_err").textContent = errMsg(err); t.disabled = false; }
+    return;
+  }
+  if (a === "save-fecho" || a === "fechar" || a === "reabrir"){
+    const d = { ...cur() };
+    if (a !== "reabrir") d.fecho = readFecho();
+    if (a === "fechar"){
+      if (!calcDeal(d).ok){ toast("Faltam pesos para fechar o negócio."); return; }
+      d.estado = "fechado"; d.fechadoEm = Date.now();
+    }
+    if (a === "reabrir") d.estado = "aberto";
+    t.disabled = true;
+    try { await saveDeal(d); toast(a === "fechar" ? "Negócio fechado." : a === "reabrir" ? "Negócio reaberto." : "Pesos guardados."); if (a === "save-fecho") t.disabled = false; else render(); }
+    catch(err){ toast(errMsg(err)); t.disabled = false; }
+    return;
+  }
+  if (a === "del"){
+    if (!t.dataset.armed){ t.dataset.armed = "1"; t.textContent = "Confirmar apagar"; setTimeout(() => { if (t.isConnected){ delete t.dataset.armed; t.textContent = "Apagar"; } }, 4000); return; }
+    try { await deleteDeal(S.currentId); toast("Negócio apagado."); go("lista"); } catch(err){ toast(errMsg(err)); }
+    return;
+  }
+  if (a === "export"){
+    const blob = new Blob([JSON.stringify({ app:"compras-gado", versao:1, exportadoEm:new Date().toISOString(), cfg:S.cfg, negocios:S.deals }, null, 2)], { type:"application/json" });
+    const url = URL.createObjectURL(blob), el = document.createElement("a");
+    el.href = url; el.download = `compras-gado-${addDays(0)}.json`; document.body.appendChild(el); el.click(); el.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000); toast("Ficheiro exportado."); return;
+  }
+  if (a === "save-defs"){
+    const g = id => $("#" + id).value;
+    const c = { ...S.cfg, faturacao: g("d_fat").trim(), equipa: g("d_eq").trim(), empresa: g("d_emp").trim(), nif: g("d_nif").trim(), morada: g("d_mor").trim(),
+      categoria: g("d_cat").trim(), refM: num(g("d_refM")), refF: num(g("d_refF")), desconto: num(g("d_desc")) ?? 0, acima: num(g("d_acima")) ?? 100, iva: num(g("d_iva")) ?? 6, condicoes: lines(g("d_cond")) };
+    t.disabled = true;
+    try { if (db) await db.doc("config/geral").set(c); S.cfg = c; if (!db) saveLocal(); toast("Definições guardadas."); }
+    catch(err){ toast(errMsg(err)); }
+    t.disabled = false; return;
+  }
+});
+document.addEventListener("change", e => {
+  if (e.target.id !== "imp_file" || !e.target.files[0]) return;
+  const st = $("#imp_status"), r = new FileReader();
+  r.onload = () => {
+    try {
+      const j = JSON.parse(r.result);
+      if (j.app !== "compras-gado") throw new Error();
+      if (j.cfg) S.cfg = { ...DEFAULT_CFG, ...j.cfg };
+      let novos = 0;
+      for (const d of (j.negocios || [])){ const i = S.deals.findIndex(x => x.id === d.id); if (i >= 0) S.deals[i] = d; else { S.deals.push(d); novos++; } }
+      S.deals.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+      saveLocal(); render(); toast(`Importado: definições e ${novos} negócio${novos === 1 ? "" : "s"} novo${novos === 1 ? "" : "s"}.`);
+    } catch(err){ st.className = "small warn"; st.textContent = "Este ficheiro não é uma exportação desta página."; }
+  };
+  r.readAsText(e.target.files[0]);
+});
+document.addEventListener("input", e => { if (e.target.id && e.target.id.startsWith("g_")) updateResult(); });
+
+/* ---------- arranque ---------- */
+loadLocal(); S.loading = false; render();
+</script>
+</body>
+</html>
