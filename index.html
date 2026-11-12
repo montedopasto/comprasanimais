@@ -495,7 +495,7 @@ function mailBox(m, key){
   const mailto = "mailto:" + m.to.map(encodeURIComponent).join(";") + "?" + [m.cc.length ? "cc=" + m.cc.map(encodeURIComponent).join(";") : "", "subject=" + encodeURIComponent(m.subject)].filter(Boolean).join("&");
   return `<dl class="mailhdr">${row("Para", m.to.join("; "), "to")}${row("Cc", m.cc.join("; "), "cc")}${row("Assunto", m.subject, "subject")}</dl>
   <div class="mail">${m.html}</div>
-  <div class="actions">${outlookReady ? `<button class="btn" data-draft="${key}">Criar rascunho no Outlook</button>` : `<a class="btn" href="${esc(mailto)}" data-copyfirst="${key}:body">Abrir aplicação de email</a>`}<button class="btn ghost" data-copy="${key}:body">Só copiar o corpo</button></div>
+  <div class="actions">${outlookReady ? `<button class="btn" data-draft="${key}">Criar email no Outlook</button>` : `<a class="btn" href="${esc(mailto)}" data-copyfirst="${key}:body">Abrir aplicação de email</a>`}<button class="btn ghost" data-copy="${key}:body">Só copiar o corpo</button></div>
   <p class="muted small" style="margin-top:10px">${outlookReady ? "Cria um rascunho com o corpo formatado na tua conta Microsoft 365." : "Abre a aplicação de email predefinida e copia o corpo da mensagem. Cola com ⌘V no Mac ou Ctrl+V no Windows."}</p>`;
 }
 
