@@ -135,6 +135,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 </div></header>
 <main id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
 <script>
 "use strict";
 const DEFAULT_CFG = {
@@ -408,16 +409,94 @@ async function doCopy(spec){
   else ok = await copyText((m[part] || []).join("; "));
   toast(ok ? (part === "body" ? "Email copiado. Cola-o no corpo da mensagem." : "Copiado.") : "Não foi possível copiar. Seleciona o texto à mão.");
 }
+// IDs públicos do registo Entra da aplicação Compras de Animais.
+const OUTLOOK = { clientId: "", tenantId: "" };
+const outlookReady = Boolean(OUTLOOK.clientId && OUTLOOK.tenantId);
+const outlook = outlookReady && window.msal ? new msal.PublicClientApplication({
+  auth: {
+    clientId: OUTLOOK.clientId,
+    authority: "https://login.microsoftonline.com/" + OUTLOOK.tenantId,
+    redirectUri: location.origin + location.pathname
+  }
+}) : null;
+const outlookInit = outlook?.initialize();
+const outlookScopes = ["Mail.ReadWrite"];
+let creatingDraft = false;
+
+async function createDraft(key, button){
+  const message = MAILS[key];
+  if (!message || creatingDraft) return;
+  const status = button.closest(".actions").nextElementSibling;
+  if (!outlook){
+    status.textContent = "A ligação ao Microsoft 365 está indisponível.";
+    return;
+  }
+  creatingDraft = true;
+  button.disabled = true;
+  status.textContent = "A preparar o rascunho…";
+  try {
+    await outlookInit;
+    const account = outlook.getActiveAccount();
+    let auth;
+    if (account){
+      try {
+        auth = await outlook.acquireTokenSilent({ scopes: outlookScopes, account });
+      } catch (error){
+        if (!(error instanceof msal.InteractionRequiredAuthError)) throw error;
+        auth = await outlook.acquireTokenPopup({ scopes: outlookScopes, account });
+      }
+    } else {
+      auth = await outlook.acquireTokenPopup({ scopes: outlookScopes, prompt: "select_account" });
+    }
+    outlook.setActiveAccount(auth.account);
+    const recipients = addresses => addresses.map(address => ({ emailAddress: { address } }));
+    const response = await fetch("https://graph.microsoft.com/v1.0/me/messages", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + auth.accessToken, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: message.subject,
+        body: { contentType: "HTML", content: message.outlookHtml },
+        toRecipients: recipients(message.to),
+        ccRecipients: recipients(message.cc)
+      })
+    });
+    if (!response.ok){
+      status.textContent = response.status === 403
+        ? "O Microsoft 365 recusou o acesso à caixa de correio. Verifica a permissão Mail.ReadWrite."
+        : "O Microsoft 365 devolveu um erro ao criar o rascunho (" + response.status + ").";
+      return;
+    }
+    const draft = await response.json();
+    status.textContent = "Rascunho guardado no Outlook.";
+    if (draft.webLink){
+      const link = document.createElement("a");
+      link.href = draft.webLink;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Abrir rascunho";
+      status.append(" ", link);
+    } else {
+      status.append(" Podes encontrá-lo na pasta Rascunhos.");
+    }
+    return;
+  } catch (error){
+    status.textContent = error?.errorCode === "user_cancelled"
+      ? "A ligação ao Outlook foi cancelada."
+      : "Não foi possível concluir a operação. Verifica a pasta Rascunhos antes de tentar novamente.";
+  } finally {
+    creatingDraft = false;
+    button.disabled = false;
+  }
+}
+
 function mailBox(m, key){
   MAILS[key] = m;
-  const drafted = cur()?.drafts?.[key];
-  const when = drafted ? new Date(drafted).toLocaleString("pt-PT", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" }) : "";
   const row = (lbl, val, part) => `<div><dt>${lbl}</dt><dd>${val ? esc(val) : `<span class="warn">Sem destinatários. Define-os em Definições.</span>`}</dd>${val ? `<button class="linkbtn" data-copy="${key}:${part}">Copiar</button>` : "<span></span>"}</div>`;
   const mailto = "mailto:" + m.to.map(encodeURIComponent).join(";") + "?" + [m.cc.length ? "cc=" + m.cc.map(encodeURIComponent).join(";") : "", "subject=" + encodeURIComponent(m.subject)].filter(Boolean).join("&");
   return `<dl class="mailhdr">${row("Para", m.to.join("; "), "to")}${row("Cc", m.cc.join("; "), "cc")}${row("Assunto", m.subject, "subject")}</dl>
   <div class="mail">${m.html}</div>
-  <div class="actions"><a class="btn" href="${esc(mailto)}" data-copyfirst="${key}:body">Abrir no Outlook</a><button class="btn ghost" data-copy="${key}:body">Só copiar o corpo</button></div>
-  <p class="muted small" style="margin-top:10px">Abre uma mensagem nova no Outlook com Para, Cc e assunto preenchidos, e copia o corpo. Clica no corpo da mensagem, cola com Ctrl+V, revê e envia.</p>`;
+  <div class="actions">${outlookReady ? `<button class="btn" data-draft="${key}">Criar rascunho no Outlook</button>` : `<a class="btn" href="${esc(mailto)}" data-copyfirst="${key}:body">Abrir aplicação de email</a>`}<button class="btn ghost" data-copy="${key}:body">Só copiar o corpo</button></div>
+  <p class="muted small" style="margin-top:10px">${outlookReady ? "Cria um rascunho com o corpo formatado na tua conta Microsoft 365." : "Abre a aplicação de email predefinida e copia o corpo da mensagem. Cola com ⌘V no Mac ou Ctrl+V no Windows."}</p>`;
 }
 
 /* ---------- guardar ---------- */
