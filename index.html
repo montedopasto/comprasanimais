@@ -178,6 +178,33 @@ const priceKg = n => fmt2(n, false) + "€/kg";
 function isoLocal(dt){ return dt.getFullYear() + "-" + String(dt.getMonth()+1).padStart(2,"0") + "-" + String(dt.getDate()).padStart(2,"0"); }
 function addDays(n){ const d = new Date(); d.setDate(d.getDate()+n); return isoLocal(d); }
 function dateLong(iso){ return new Date(iso + "T12:00:00").toLocaleDateString("pt-PT", { day:"numeric", month:"long", year:"numeric" }); }
+function loadingWeek(iso){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
+  const start = new Date(iso + "T00:00:00Z");
+  if (Number.isNaN(start.getTime()) || start.toISOString().slice(0, 10) !== iso) return null;
+  start.setUTCDate(start.getUTCDate() - (start.getUTCDay() + 6) % 7);
+  const end = new Date(start);
+  end.setUTCDate(end.getUTCDate() + 6);
+  const thursday = new Date(start);
+  thursday.setUTCDate(thursday.getUTCDate() + 3);
+  const year = thursday.getUTCFullYear();
+  const week = Math.ceil(((thursday - Date.UTC(year, 0, 1)) / 86400000 + 1) / 7);
+  const monday = start.toISOString().slice(0, 10);
+  return { monday, label: `semana ${week} de ${year} (${dateShort(monday)} a ${dateShort(end.toISOString().slice(0, 10))})` };
+}
+function loadingSummary(d, formatDate){
+  const week = loadingWeek(d.semanaCarregamento);
+  if (week) return `carregamento na ${week.label}`;
+  return d.dataCarregamento ? `carregamento a ${formatDate(d.dataCarregamento)}` : null;
+}
+function syncLoadingDate(){
+  const weekly = $("#f_periodo").value === "semana";
+  const input = $("#f_data");
+  const week = weekly ? loadingWeek(input.value) : null;
+  $("#f_data_label").textContent = weekly ? "Escolhe um dia da semana" : "Data";
+  $("#f_semana_info").textContent = weekly ? (week ? week.label : "Seleciona qualquer dia da semana pretendida.") : "";
+  $("#f_semana_info").hidden = !weekly;
+}
 function dateShort(iso){ return new Date(iso + "T12:00:00").toLocaleDateString("pt-PT", { day:"numeric", month:"short" }); }
 function splitEmails(s){ return String(s || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); }
 function lines(s){ return String(s || "").split("\n").map(x => x.trim()).filter(Boolean); }
@@ -254,7 +281,10 @@ function emailAcordo(d){
   (d.observacoes || []).forEach(c => rules.push(c));
   const intro = `Chegámos a acordo para a compra de ${d.nAnimais ? "aproximadamente " + d.nAnimais + " animais" : "animais"} ${aoV(d)} com as seguintes condições:`;
   let carr = "";
-  if (d.dataCarregamento){
+  const week = loadingWeek(d.semanaCarregamento);
+  if (week){
+    carr = `Carregamento a efetuar ${d.carregamentoPor === "vendedor" ? "pelo vendedor" : "por nós"} na ${week.label}.`;
+  } else if (d.dataCarregamento){
     const dia = new Date(d.dataCarregamento + "T12:00:00").toLocaleDateString("pt-PT", { weekday:"long" });
     const base = `${dia}, dia ${dateLong(d.dataCarregamento)}`;
     const quando = d.dataCarregamento === addDays(1) ? `amanhã, ${base}` : d.dataCarregamento === addDays(0) ? `hoje, ${base}` : `${/sábado|domingo/.test(dia) ? "no" : "na"} ${base}`;
@@ -526,6 +556,10 @@ async function aiDeal(){
   readForm();
   const j = parseDeal(txt), d = S.draft;
   ["tratamento","vendedor","emailVendedor","nAnimais","lotes","desconto","acima","refM","refF","dataCarregamento","carregamentoPor"].forEach(k => { if (j[k] !== undefined && j[k] !== null) d[k] = j[k]; });
+  if (j.dataCarregamento && d.periodoCarregamento === "semana"){
+    d.semanaCarregamento = loadingWeek(j.dataCarregamento)?.monday || "";
+    d.dataCarregamento = "";
+  }
   render(); $("#ai_txt").value = txt;
   $("#ai_status").textContent = j.achou.length ? `Preenchi: ${j.achou.join(", ")}. Confirma tudo antes de guardar.` : "Não consegui tirar dados do texto. Preenche os campos à mão.";
 }
@@ -572,7 +606,7 @@ function viewLista(){
   if (!S.deals.length) return h + `<div class="panel empty"><p><strong>Ainda não há negócios registados.</strong></p><p class="muted">Regista o primeiro quando chegares a acordo com um vendedor. O email de acordo fica logo pronto a enviar.</p><div class="actions"><button class="btn" data-go="novo">Registar negócio</button></div></div>`;
   const row = d => {
     const fech = d.estado === "fechado"; const c = fech ? calcDeal(d) : null;
-    const meta = [fech ? `${c.tot.n} animais` : d.nAnimais ? `cerca de ${d.nAnimais} animais` : null, d.dataCarregamento ? `carregamento a ${dateShort(d.dataCarregamento)}` : null].filter(Boolean).join(", ");
+    const meta = [fech ? `${c.tot.n} animais` : d.nAnimais ? `cerca de ${d.nAnimais} animais` : null, loadingSummary(d, dateShort)].filter(Boolean).join(", ");
     return `<button class="deal" data-open="${esc(d.id)}"><span class="dn">${esc(nomeV(d) || "Sem nome")}</span><span class="badge ${fech ? "done" : ""}">${fech ? "Fechado" : "À espera de pesos"}</span><span class="dm">${esc(meta)}</span>${fech && c.ok ? `<span class="dv">${eur(c.tot.total)}</span>` : "<span></span>"}</button>`;
   };
   const open = S.deals.filter(d => d.estado !== "fechado"), closed = S.deals.filter(d => d.estado === "fechado");
@@ -614,7 +648,8 @@ function viewForm(){
     </div>
     <h3>Carregamento</h3>
     <div class="fields">
-      ${fld("f_data","Data",d.dataCarregamento||"","","date")}
+      <label class="f">Agendar por<select id="f_periodo"><option value="dia">Dia</option><option value="semana" ${d.periodoCarregamento==="semana" || d.semanaCarregamento ? "selected" : ""}>Semana</option></select></label>
+      <label class="f"><span id="f_data_label">Data</span><input id="f_data" type="date" value="${esc(d.semanaCarregamento || d.dataCarregamento || "")}" aria-describedby="f_semana_info"><span id="f_semana_info" class="small muted" aria-live="polite" hidden></span></label>
       <label class="f">Feito por<select id="f_por"><option value="nos" ${d.carregamentoPor!=="vendedor"?"selected":""}>Nós</option><option value="vendedor" ${d.carregamentoPor==="vendedor"?"selected":""}>Vendedor</option></select></label>
     </div>
     <h3>Condições</h3>
@@ -631,7 +666,10 @@ function readForm(){
     nAnimais: num(g("f_nAnimais")),
     lotes: [...document.querySelectorAll(".loterow")].map(r => ({ id: r.dataset.lote, sexo: r.querySelector(".l_sexo").value, categoria: r.querySelector(".l_cat").value.trim(), preco: num(r.querySelector(".l_preco").value) })),
     refM: num(g("f_refM")), refF: num(g("f_refF")), desconto: num(g("f_desconto")) ?? 0, acima: num(g("f_acima")) ?? 100,
-    dataCarregamento: g("f_data"), carregamentoPor: g("f_por"), condicoes: lines(g("f_condicoes")), observacoes: lines(g("f_obs"))
+    periodoCarregamento: g("f_periodo"),
+    dataCarregamento: g("f_periodo") === "dia" ? g("f_data") : "",
+    semanaCarregamento: g("f_periodo") === "semana" ? loadingWeek(g("f_data"))?.monday || "" : "",
+    carregamentoPor: g("f_por"), condicoes: lines(g("f_condicoes")), observacoes: lines(g("f_obs"))
   });
   delete d.precoM; delete d.precoF; delete d.categoria;
   return d;
@@ -639,7 +677,7 @@ function readForm(){
 function viewNegocio(){
   const d = cur(); if (!d) return `<p>Este negócio já não existe.</p><div class="actions"><button class="btn ghost" data-go="lista">Voltar aos negócios</button></div>`;
   const F = fechoOf(d), fech = d.estado === "fechado", L = lotesOf(d);
-  const meta = [d.nAnimais ? `Cerca de ${d.nAnimais} animais` : null, ...L.map(l => `${loteNome(l).toLowerCase()} ${priceKg(l.preco)}`), d.dataCarregamento ? `carregamento a ${dateLong(d.dataCarregamento)}` : null].filter(Boolean).join(", ");
+  const meta = [d.nAnimais ? `Cerca de ${d.nAnimais} animais` : null, ...L.map(l => `${loteNome(l).toLowerCase()} ${priceKg(l.preco)}`), loadingSummary(d, dateLong)].filter(Boolean).join(", ");
   const inp = (id, val, lbl, mode) => `<input id="${id}" inputmode="${mode}" value="${esc(v(val))}" aria-label="${esc(lbl)}">`;
   return `<div class="head"><div><h1>${esc(nomeV(d))}</h1><p class="meta">${esc(meta)}</p><p class="meta small" id="criador"></p></div>
     <div class="actions" style="margin:0"><button class="btn ghost" data-act="edit">Editar condições</button><button class="btn ghost danger" data-act="del">Apagar</button></div></div>
@@ -702,6 +740,7 @@ function render(){
   const m = $("#main");
   m.innerHTML = S.view === "form" ? viewForm() : S.view === "negocio" ? viewNegocio() : S.view === "definicoes" ? viewDefs() : viewLista();
   refreshAssist();
+  if (S.view === "form") syncLoadingDate();
   if (S.view === "negocio"){
     updateResult();
     const d = cur();
@@ -735,6 +774,7 @@ document.addEventListener("click", async e => {
   }
   if (a === "save-deal"){
     const d = readForm();
+    if (d.periodoCarregamento === "semana" && !d.semanaCarregamento){ $("#f_err").textContent = "Escolhe um dia da semana de carregamento."; $("#f_data").focus(); return; }
     if (!d.vendedor){ $("#f_err").textContent = "Falta o nome do vendedor."; $("#f_vendedor").focus(); return; }
     if (!(d.lotes || []).some(l => l.preco)){ $("#f_err").textContent = "Falta pelo menos um preço por kg."; return; }
     d.lotes = d.lotes.filter(l => l.preco);
@@ -779,6 +819,7 @@ document.addEventListener("click", async e => {
   }
 });
 document.addEventListener("change", e => {
+  if (e.target.id === "f_periodo" || e.target.id === "f_data") syncLoadingDate();
   if (e.target.id !== "imp_file" || !e.target.files[0]) return;
   const st = $("#imp_status"), r = new FileReader();
   r.onload = () => {
