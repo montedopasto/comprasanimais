@@ -190,20 +190,36 @@ function loadingWeek(iso){
   const year = thursday.getUTCFullYear();
   const week = Math.ceil(((thursday - Date.UTC(year, 0, 1)) / 86400000 + 1) / 7);
   const monday = start.toISOString().slice(0, 10);
-  return { monday, label: `semana ${week} de ${year} (${dateShort(monday)} a ${dateShort(end.toISOString().slice(0, 10))})` };
+  const range = `${dateShort(monday)} a ${dateShort(end.toISOString().slice(0, 10))}`;
+  return { monday, year, week, range, label: `semana ${week} de ${year} (${range})` };
 }
 function loadingSummary(d, formatDate){
   const week = loadingWeek(d.semanaCarregamento);
   if (week) return `carregamento na ${week.label}`;
   return d.dataCarregamento ? `carregamento a ${formatDate(d.dataCarregamento)}` : null;
 }
+function weekMonday(year, week){
+  const january = loadingWeek(`${year}-01-04`);
+  if (!january) return "";
+  const day = new Date(january.monday + "T00:00:00Z");
+  day.setUTCDate(day.getUTCDate() + (week - 1) * 7);
+  return day.toISOString().slice(0, 10);
+}
+function fillLoadingWeeks(year, selected){
+  const select = $("#f_semana");
+  const count = loadingWeek(`${year}-12-28`)?.week || 0;
+  select.replaceChildren(new Option("Seleciona a semana", ""));
+  for (let week = 1; week <= count; week++){
+    select.add(new Option(`Semana ${week} de ${year}`, weekMonday(year, week)));
+  }
+  select.value = selected >= 1 && selected <= count ? weekMonday(year, selected) : "";
+}
 function syncLoadingDate(){
   const weekly = $("#f_periodo").value === "semana";
-  const input = $("#f_data");
-  const week = weekly ? loadingWeek(input.value) : null;
-  $("#f_data_label").textContent = weekly ? "Escolhe um dia da semana" : "Data";
-  $("#f_semana_info").textContent = weekly ? (week ? week.label : "Seleciona qualquer dia da semana pretendida.") : "";
-  $("#f_semana_info").hidden = !weekly;
+  $("#f_dia_fields").hidden = weekly;
+  $("#f_semana_fields").hidden = !weekly;
+  const week = loadingWeek($("#f_semana").value);
+  $("#f_semana_info").textContent = week ? week.range : "";
 }
 function dateShort(iso){ return new Date(iso + "T12:00:00").toLocaleDateString("pt-PT", { day:"numeric", month:"short" }); }
 function splitEmails(s){ return String(s || "").split(/[,;\n]+/).map(x => x.trim()).filter(Boolean); }
@@ -649,7 +665,12 @@ function viewForm(){
     <h3>Carregamento</h3>
     <div class="fields">
       <label class="f">Agendar por<select id="f_periodo"><option value="dia">Dia</option><option value="semana" ${d.periodoCarregamento==="semana" || d.semanaCarregamento ? "selected" : ""}>Semana</option></select></label>
-      <label class="f"><span id="f_data_label">Data</span><input id="f_data" type="date" value="${esc(d.semanaCarregamento || d.dataCarregamento || "")}" aria-describedby="f_semana_info"><span id="f_semana_info" class="small muted" aria-live="polite" hidden></span></label>
+      <div id="f_dia_fields">${fld("f_data","Data",d.dataCarregamento || d.semanaCarregamento || "","","date")}</div>
+      <div id="f_semana_fields" hidden>
+        <label class="f">Semana do calendário<select id="f_semana" aria-describedby="f_semana_info"></select></label>
+        <span id="f_semana_info" class="small muted" aria-live="polite"></span>
+        ${fld("f_ano_semana","Ano",loadingWeek(d.semanaCarregamento || d.dataCarregamento)?.year || addDays(0).slice(0, 4),"","number",'min="1000" max="9998" step="1"')}
+      </div>
       <label class="f">Feito por<select id="f_por"><option value="nos" ${d.carregamentoPor!=="vendedor"?"selected":""}>Nós</option><option value="vendedor" ${d.carregamentoPor==="vendedor"?"selected":""}>Vendedor</option></select></label>
     </div>
     <h3>Condições</h3>
@@ -668,7 +689,7 @@ function readForm(){
     refM: num(g("f_refM")), refF: num(g("f_refF")), desconto: num(g("f_desconto")) ?? 0, acima: num(g("f_acima")) ?? 100,
     periodoCarregamento: g("f_periodo"),
     dataCarregamento: g("f_periodo") === "dia" ? g("f_data") : "",
-    semanaCarregamento: g("f_periodo") === "semana" ? loadingWeek(g("f_data"))?.monday || "" : "",
+    semanaCarregamento: g("f_periodo") === "semana" ? g("f_semana") : "",
     carregamentoPor: g("f_por"), condicoes: lines(g("f_condicoes")), observacoes: lines(g("f_obs"))
   });
   delete d.precoM; delete d.precoF; delete d.categoria;
@@ -740,7 +761,11 @@ function render(){
   const m = $("#main");
   m.innerHTML = S.view === "form" ? viewForm() : S.view === "negocio" ? viewNegocio() : S.view === "definicoes" ? viewDefs() : viewLista();
   refreshAssist();
-  if (S.view === "form") syncLoadingDate();
+  if (S.view === "form"){
+    const week = loadingWeek(S.draft.semanaCarregamento || S.draft.dataCarregamento);
+    fillLoadingWeeks($("#f_ano_semana").value, week?.week);
+    syncLoadingDate();
+  }
   if (S.view === "negocio"){
     updateResult();
     const d = cur();
@@ -774,7 +799,7 @@ document.addEventListener("click", async e => {
   }
   if (a === "save-deal"){
     const d = readForm();
-    if (d.periodoCarregamento === "semana" && !d.semanaCarregamento){ $("#f_err").textContent = "Escolhe um dia da semana de carregamento."; $("#f_data").focus(); return; }
+    if (d.periodoCarregamento === "semana" && !d.semanaCarregamento){ $("#f_err").textContent = "Seleciona a semana de carregamento."; $("#f_semana").focus(); return; }
     if (!d.vendedor){ $("#f_err").textContent = "Falta o nome do vendedor."; $("#f_vendedor").focus(); return; }
     if (!(d.lotes || []).some(l => l.preco)){ $("#f_err").textContent = "Falta pelo menos um preço por kg."; return; }
     d.lotes = d.lotes.filter(l => l.preco);
@@ -819,7 +844,17 @@ document.addEventListener("click", async e => {
   }
 });
 document.addEventListener("change", e => {
-  if (e.target.id === "f_periodo" || e.target.id === "f_data") syncLoadingDate();
+  if (e.target.id === "f_ano_semana"){
+    fillLoadingWeeks(e.target.value, loadingWeek($("#f_semana").value)?.week);
+  }
+  if (e.target.id === "f_data" && $("#f_periodo").value === "dia"){
+    const week = loadingWeek(e.target.value);
+    if (week){
+      $("#f_ano_semana").value = week.year;
+      fillLoadingWeeks(week.year, week.week);
+    }
+  }
+  if (["f_periodo", "f_semana", "f_ano_semana"].includes(e.target.id)) syncLoadingDate();
   if (e.target.id !== "imp_file" || !e.target.files[0]) return;
   const st = $("#imp_status"), r = new FileReader();
   r.onload = () => {
