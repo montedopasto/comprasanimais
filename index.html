@@ -133,9 +133,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
     <button data-go="definicoes">Definições</button>
   </nav>
 </div></header>
+<div id="sheet_connection"></div>
 <main id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async></script>
 <script>
 "use strict";
 const DEFAULT_CFG = {
@@ -504,22 +506,128 @@ function loadLocal(){
   try { S.deals = JSON.parse(localStorage.getItem("mp-negocios") || "[]"); } catch(e){ S.deals = []; }
   try { const c = JSON.parse(localStorage.getItem("mp-config") || "null"); if (c) S.cfg = { ...DEFAULT_CFG, ...c }; } catch(e){}
 }
-function saveLocal(){ try { localStorage.setItem("mp-negocios", JSON.stringify(S.deals)); localStorage.setItem("mp-config", JSON.stringify(S.cfg)); } catch(e){} }
-function errMsg(e){ return e && e.code === "invalid_argument" ? "Não foi possível guardar." : e && e.code === "quota_exceeded" ? "O armazenamento está cheio. Exporta e apaga negócios antigos." : "Não foi possível guardar. Tenta outra vez."; }
+
+function errMsg(e){ if (e instanceof Error && e.message) return e.message; return e && e.code === "invalid_argument" ? "Não foi possível guardar." : e && e.code === "quota_exceeded" ? "O armazenamento está cheio. Exporta e apaga negócios antigos." : "Não foi possível guardar. Tenta outra vez."; }
+const SHEET_API = "https://sheets.googleapis.com/v4/spreadsheets/1smmgVlrQ9Aks6HAag3GrhA0dqDg-dznjw3sbnZjCmDI";
+const GOOGLE_CLIENT = "377727930868-8bpui5eojpk38egtfbabm388arfa35fa.apps.googleusercontent.com";
+let sheetToken = "", sheetExpiry = 0, sheetConnected = false;
+const sheetRange = suffix => "/values/" + encodeURIComponent("'Negócios'!" + suffix);
+function sheetSession(){
+  return Boolean(sheetToken && Date.now() < sheetExpiry);
+}
+async function sheetCall(path, method = "GET", data){
+  if (!sheetSession()) throw new Error("Liga ao Google Sheets para guardar ou atualizar negócios.");
+  const response = await fetch(SHEET_API + path, {
+    method, headers: { Authorization: "Bearer " + sheetToken, "Content-Type": "application/json" },
+    body: data === undefined ? undefined : JSON.stringify(data)
+  });
+  if (response.status === 401){
+    sheetExpiry = 0;
+    showSheetConnection();
+    throw new Error("A sessão Google terminou. Volta a ligar ao Google Sheets.");
+  }
+  if (!response.ok) throw new Error(response.status === 403
+    ? "A conta Google precisa de acesso de edição à folha Compras de Animais."
+    : "O Google Sheets devolveu um erro (" + response.status + ").");
+  return response.json();
+}
+async function sheetRecords(){
+  const result = await sheetCall(sheetRange("A2:H") + "?valueRenderOption=UNFORMATTED_VALUE");
+  const records = new Map();
+  for (const [index, row] of (result.values || []).entries()){
+    if (!row[0]) continue;
+    const deal = JSON.parse(row[7]);
+    if (!deal || String(deal.id) !== String(row[0]) || records.has(String(row[0]))){
+      throw new Error("Existe um ID inválido ou duplicado na folha de negócios.");
+    }
+    records.set(String(deal.id), { row: index + 2, deal });
+  }
+  return records;
+}
+function sheetDealRow(deal){
+  return [String(deal.id), deal.vendedor || "", deal.dataCarregamento || "",
+    loadingWeek(deal.semanaCarregamento || deal.dataCarregamento)?.monday || "",
+    deal.nAnimais ?? "", deal.carregamentoPor || "", deal.classificacao || "", JSON.stringify(deal)];
+}
+async function appendSheetDeals(deals){
+  if (!deals.length) return;
+  await sheetCall(sheetRange("A:H") + ":append?valueInputOption=RAW&insertDataOption=INSERT_ROWS",
+    "POST", { values: deals.map(sheetDealRow) });
+}
+function showSheetConnection(){
+  const connection = $("#sheet_connection");
+  if (!sheetSession() || !sheetConnected){
+    connection.innerHTML = '<div class="panel"><button class="btn" data-act="connect-sheet">Ligar ao Google Sheets</button><p id="sheet_status" class="small muted" aria-live="polite">Liga a conta Google para consultar e guardar o histórico partilhado.</p></div>';
+  } else {
+    connection.innerHTML = '<div class="panel"><span class="small muted">Histórico no Google Sheets</span> <button class="btn ghost" data-act="connect-sheet">Atualizar negócios</button><p id="sheet_status" class="small muted" aria-live="polite"></p></div>';
+  }
+}
+async function syncSheet(){
+  let records = await sheetRecords();
+  let local = [];
+  try { local = JSON.parse(localStorage.getItem("mp-negocios") || "[]"); } catch {}
+  const pending = new Map(local.filter(d => d?.id && !records.has(String(d.id))).map(d => [String(d.id), d]));
+  if (pending.size){
+    await appendSheetDeals([...pending.values()]);
+    records = await sheetRecords();
+    if ([...pending.keys()].some(id => !records.has(id))) throw new Error("A migração ainda não foi confirmada na folha.");
+  }
+  S.deals = [...records.values()].map(x => x.deal).filter(d => !d.apagadoEm)
+    .sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
+  sheetConnected = true;
+}
+async function connectSheet(button){
+  const status = $("#sheet_status");
+  button.disabled = true;
+  status.textContent = "A ligar ao Google Sheets…";
+  try {
+    if (!sheetSession()){
+      if (!window.google?.accounts?.oauth2) throw new Error("O início de sessão Google está indisponível. Atualiza a página.");
+      const auth = await new Promise((resolve, reject) => {
+        google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT,
+          scope: "https://www.googleapis.com/auth/spreadsheets",
+          callback: result => result.error ? reject(new Error("O Google recusou a ligação: " + result.error)) : resolve(result),
+          error_callback: () => reject(new Error("O início de sessão Google foi cancelado ou bloqueado pelo navegador."))
+        }).requestAccessToken();
+      });
+      sheetToken = auth.access_token;
+      sheetExpiry = Date.now() + Math.max(0, Number(auth.expires_in) - 30) * 1000;
+    }
+    await syncSheet();
+    showSheetConnection();
+    if (S.view !== "form") render();
+    toast("Histórico atualizado.");
+  } catch (error){
+    status.textContent = error.message;
+    button.disabled = false;
+  }
+}
 async function saveDeal(d){
-  const body = JSON.parse(JSON.stringify(d)); delete body.id;
-  if (db){
-    const ref = d.id ? db.doc("negocios/" + d.id) : db.collection("negocios").doc();
-    await ref.set(body); d.id = ref.id;
-  } else if (!d.id) d.id = "n" + Date.now().toString(36);
-  const i = S.deals.findIndex(x => x.id === d.id);
-  if (i >= 0) S.deals[i] = { ...d }; else S.deals.unshift({ ...d });
-  if (!db) saveLocal();
+  if (!sheetConnected) throw new Error("Liga ao Google Sheets antes de guardar o negócio.");
+  if (!d.id) d.id = crypto.randomUUID();
+  const records = await sheetRecords();
+  const existing = records.get(String(d.id));
+  if (existing?.deal.apagadoEm) throw new Error("Este negócio foi apagado. Atualiza a lista.");
+  if (existing){
+    const range = sheetRange("A" + existing.row + ":H" + existing.row);
+    await sheetCall(range + "?valueInputOption=RAW", "PUT", { values: [sheetDealRow(d)] });
+  } else {
+    await appendSheetDeals([d]);
+  }
+  const index = S.deals.findIndex(deal => deal.id === d.id);
+  if (index < 0) S.deals.unshift({ ...d });
+  else S.deals[index] = { ...d };
   return d.id;
 }
 async function deleteDeal(id){
-  if (db) await db.doc("negocios/" + id).delete();
-  S.deals = S.deals.filter(x => x.id !== id); if (!db) saveLocal();
+  if (!sheetConnected) throw new Error("Liga ao Google Sheets antes de apagar o negócio.");
+  const existing = (await sheetRecords()).get(String(id));
+  if (existing && !existing.deal.apagadoEm){
+    await sheetCall(sheetRange("H" + existing.row) + "?valueInputOption=RAW", "PUT",
+      { values: [[JSON.stringify({ ...existing.deal, apagadoEm: new Date().toISOString() })]] });
+  }
+  S.deals = S.deals.filter(d => d.id !== id);
 }
 
 /* ---------- Claude ---------- */
@@ -825,7 +933,7 @@ function viewDefs(){
     <label class="f wide">Uma por linha<textarea id="d_cond" rows="9">${esc((c.condicoes||[]).join("\n"))}</textarea></label>
     <div class="actions"><button class="btn" data-act="save-defs">Guardar definições</button></div>
     <h3 style="margin-top:32px">Cópia de segurança e passagem para outro PC</h3>
-    <p class="muted small">Os negócios e as definições ficam só neste navegador. Exporta para guardar uma cópia ou para passar tudo para outro computador, e lá importa o ficheiro.</p>
+    <p class="muted small">Os negócios ficam no Google Sheets. As definições ficam neste navegador. Podes exportar uma cópia dos negócios e das definições.</p>
     <div class="actions"><button class="btn ghost" data-act="export">Exportar ficheiro</button><label class="btn ghost" style="cursor:pointer">Importar ficheiro<input id="imp_file" type="file" accept=".json,application/json" hidden></label></div>
     <p class="small" id="imp_status" aria-live="polite" style="margin-top:10px"></p>
   </div>`;
@@ -906,6 +1014,7 @@ document.addEventListener("click", async e => {
     try { await deleteDeal(S.currentId); toast("Negócio apagado."); go("lista"); } catch(err){ toast(errMsg(err)); }
     return;
   }
+  if (a === "connect-sheet") return connectSheet(t);
   if (a === "export"){
     const blob = new Blob([JSON.stringify({ app:"compras-gado", versao:1, exportadoEm:new Date().toISOString(), cfg:S.cfg, negocios:S.deals }, null, 2)], { type:"application/json" });
     const url = URL.createObjectURL(blob), el = document.createElement("a");
@@ -917,7 +1026,7 @@ document.addEventListener("click", async e => {
     const c = { ...S.cfg, faturacao: g("d_fat").trim(), equipa: g("d_eq").trim(), empresa: g("d_emp").trim(), nif: g("d_nif").trim(), morada: g("d_mor").trim(),
       categoria: g("d_cat").trim(), refM: num(g("d_refM")), refF: num(g("d_refF")), desconto: num(g("d_desc")) ?? 0, acima: num(g("d_acima")) ?? 100, iva: num(g("d_iva")) ?? 6, condicoes: lines(g("d_cond")) };
     t.disabled = true;
-    try { if (db) await db.doc("config/geral").set(c); S.cfg = c; if (!db) saveLocal(); toast("Definições guardadas."); }
+    try { S.cfg = c; localStorage.setItem("mp-config", JSON.stringify(c)); toast("Definições guardadas."); }
     catch(err){ toast(errMsg(err)); }
     t.disabled = false; return;
   }
@@ -936,23 +1045,31 @@ document.addEventListener("change", e => {
   if (["f_periodo", "f_semana", "f_ano_semana"].includes(e.target.id)) syncLoadingDate();
   if (e.target.id !== "imp_file" || !e.target.files[0]) return;
   const st = $("#imp_status"), r = new FileReader();
-  r.onload = () => {
+  r.onload = async () => {
     try {
       const j = JSON.parse(r.result);
-      if (j.app !== "compras-gado") throw new Error();
-      if (j.cfg) S.cfg = { ...DEFAULT_CFG, ...j.cfg };
-      let novos = 0;
-      for (const d of (j.negocios || [])){ const i = S.deals.findIndex(x => x.id === d.id); if (i >= 0) S.deals[i] = d; else { S.deals.push(d); novos++; } }
-      S.deals.sort((a, b) => (b.criadoEm || 0) - (a.criadoEm || 0));
-      saveLocal(); render(); toast(`Importado: definições e ${novos} negócio${novos === 1 ? "" : "s"} novo${novos === 1 ? "" : "s"}.`);
-    } catch(err){ st.className = "small warn"; st.textContent = "Este ficheiro não é uma exportação desta página."; }
+      if (j.app !== "compras-gado" || !Array.isArray(j.negocios) || j.negocios.some(d => !d?.id)) {
+        throw new Error("Este ficheiro não é uma exportação válida desta página.");
+      }
+      if (!sheetConnected) throw new Error("Liga ao Google Sheets antes de importar.");
+      const existing = await sheetRecords();
+      const pending = new Map(j.negocios.filter(d => !existing.has(String(d.id))).map(d => [String(d.id), d]));
+      await appendSheetDeals([...pending.values()]);
+      await syncSheet();
+      if (j.cfg){
+        S.cfg = { ...DEFAULT_CFG, ...j.cfg };
+        localStorage.setItem("mp-config", JSON.stringify(S.cfg));
+      }
+      render();
+      toast(`Importado: ${pending.size} negócio(s) novo(s).`);
+    } catch(err){ st.className = "small warn"; st.textContent = errMsg(err); }
   };
   r.readAsText(e.target.files[0]);
 });
 document.addEventListener("input", e => { if (e.target.id && e.target.id.startsWith("g_")) updateResult(); });
 
 /* ---------- arranque ---------- */
-loadLocal(); S.loading = false; render();
+loadLocal(); S.loading = false; showSheetConnection(); render();
 </script>
 </body>
 </html>
