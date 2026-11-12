@@ -410,13 +410,13 @@ async function doCopy(spec){
   toast(ok ? (part === "body" ? "Email copiado. Cola-o no corpo da mensagem." : "Copiado.") : "Não foi possível copiar. Seleciona o texto à mão.");
 }
 // IDs públicos do registo Entra da aplicação Compras de Animais.
-const OUTLOOK = { clientId: "", tenantId: "" };
+const OUTLOOK = { clientId: "82867c8b-9bb5-4f0d-a83d-f8ac22edfcf5", tenantId: "ee417351-ea90-41e0-9147-5ea6ab38ea49" };
 const outlookReady = Boolean(OUTLOOK.clientId && OUTLOOK.tenantId);
 const outlook = outlookReady && window.msal ? new msal.PublicClientApplication({
   auth: {
     clientId: OUTLOOK.clientId,
     authority: "https://login.microsoftonline.com/" + OUTLOOK.tenantId,
-    redirectUri: location.origin + location.pathname
+    redirectUri: "https://montedopasto.github.io/comprasanimais/"
   }
 }) : null;
 const outlookInit = outlook?.initialize();
